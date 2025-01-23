@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { UserType } from "../types/userType/userType";
+import { UserType } from "../../types/userType/userType";
 import bcrypt from 'bcryptjs';
 
 const userModel = new mongoose.Schema<UserType>({
@@ -21,6 +21,11 @@ const userModel = new mongoose.Schema<UserType>({
         required: true,
         min: 3
     },
+    isAdmin: {
+    type: Boolean, 
+    required: true,
+    default:false
+},
     resetPasswordToken: {type: String},
     resetPasswordExpires: {type: Date},
     twoFactorSecret: {type: String},

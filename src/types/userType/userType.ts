@@ -5,6 +5,7 @@ export interface UserType extends Document {
     lastName: string;
     email: string;
     password: string;
+    isAdmin:boolean;
     resetPasswordToken?: string;
     resetPasswordExpires?: Date;
     twoFactorSecret?: string; // Store the secret for 2SV

@@ -1,4 +1,4 @@
-import User from "../../models/user.model";
+import User from "../../models/user/user.model";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
@@ -51,8 +51,8 @@ const loginAccount = async (req: Request, res: Response) => {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid credentials" });
         }
 
-        // Create and sign JWT token
-        const token = jwt.sign({ userId: existingUser._id }, process.env.JWT_SECRET_KEY as string, { expiresIn: "1d" });
+    // Create and sign JWT token with user's isAdmin status
+    const token = jwt.sign({ userId: existingUser._id}, process.env.JWT_SECRET_KEY as string, { expiresIn: "1d" });
 
         // Set cookie with the token
         res.cookie("auth_token", token, {
@@ -139,6 +139,54 @@ const logOutUserFromHisOrHerAccount = async (req: Request, res: Response): Promi
     }
 }
 
+// Signup Admin
+const signUpAdmin = async (req: Request, res: Response): Promise<Response> => {
+    const { firstName, lastName, email, password } = req.body;
+
+    if (!firstName || !lastName || !email || !password) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ message: "All fields are required" });
+    }
+    
+    try {
+        // Check if the admin already exists
+        const existingAdmin = await User.findOne({ email });
+        if (existingAdmin) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Admin already exists!" });
+        }
+        
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newAdmin = new User({
+            firstName,
+            lastName,
+            email,
+            password: hashedPassword,
+            isAdmin: true
+        });
+
+        // Save the new admin user
+        await newAdmin.save();
+
+        // Generate the token
+        const token = jwt.sign(
+            { id: newAdmin._id, email: newAdmin.email, isAdmin: newAdmin.isAdmin },
+            process.env.SUPER_ADMIN_TOKEN as string,
+            { expiresIn: '1h' }
+        );
+
+        // Set the cookie
+        res.cookie("admin_token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 86400000 // 1 day
+        });
+
+        return res.status(StatusCodes.CREATED).json({ message: "Admin has been created successfully." });
+    } catch (error) {
+        console.error("Registration error:", error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong." });
+    }
+};
 
 // Generate 2FA secret and send codes expired." 
 // Function to send the 2FA code
@@ -283,6 +331,7 @@ export {
     fetchAnAccount,
     updateAccount,
     logOutUserFromHisOrHerAccount,
+    signUpAdmin,
     deleteAccount,
     requestPasswordReset,
     setNewAccountPassword

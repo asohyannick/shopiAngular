@@ -6,6 +6,7 @@ import {
     fetchAnAccount, 
     updateAccount, 
     logOutUserFromHisOrHerAccount,
+    signUpAdmin,
     deleteAccount, 
     requestPasswordReset, 
     setNewAccountPassword,
@@ -20,5 +21,6 @@ router.put("/update-account/:id", updateAccount);
 router.delete("/delete-account/:id", deleteAccount);
 router.post("/password-reset", requestPasswordReset);
 router.post("/set-new-password/:token", setNewAccountPassword);
-router.post("/logout", logOutUserFromHisOrHerAccount)
+router.post("/logout", logOutUserFromHisOrHerAccount);
+router.post("/admin/signup",  signUpAdmin);
 export default router;

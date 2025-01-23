@@ -4,7 +4,10 @@ import cookieParser from "cookie-parser";
 import 'dotenv/config';
 import helmet from 'helmet';
 import cors from 'cors';
+// routes
 import authRoute from "./routes/auth/user";
+import productRoute from './routes/product/product';
+// DB 
 import connectToDatabase from './config/connectDB';
 const app: Application = express();
 const port: number | string = process.env.APP_PORT || 8000;
@@ -23,6 +26,7 @@ app.use(cors());
 
 // Routes Registration
 app.use(`/api/${process.env.API_VERSION}/auth`, authRoute);
+app.use(`/api/${process.env.API_VERSION}/product`, productRoute);
 
 // Database Registration
 async function serve() {
