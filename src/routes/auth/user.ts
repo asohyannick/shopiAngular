@@ -8,7 +8,7 @@ import {
     logOutUserFromHisOrHerAccount,
     deleteAccount, 
     requestPasswordReset, 
-    resetAccountPassword,
+    setNewAccountPassword,
 } from '../../controllers/auth/user';
 import schemaValidator from '../../middleware/schemaValidator/schemaValidator';
 const router = express.Router();
@@ -19,6 +19,6 @@ router.get("/single-account/:id", fetchAnAccount);
 router.put("/update-account/:id", updateAccount);
 router.delete("/delete-account/:id", deleteAccount);
 router.post("/password-reset", requestPasswordReset);
-router.post("/reset-account/:token", resetAccountPassword);
+router.post("/set-new-password/:token", setNewAccountPassword);
 router.post("/logout", logOutUserFromHisOrHerAccount)
 export default router;

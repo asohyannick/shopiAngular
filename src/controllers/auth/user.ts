@@ -176,7 +176,7 @@ const sendPasswordResetEmail = async (email: string, resetLink: string, twoFACod
                 <p>Your 2FA code is: <strong>${twoFACode}</strong></p>
                 <p>Click the link below to reset your password:</p>
                 <p><a href="${resetLink}">Reset Password</a></p>
-                <p>If you did not request this, please ignore this email.</`,
+                <p>If you did not request this, please ignore this email.</p>`,
     };
     return transporter.sendMail(mailOptions);
 };
@@ -200,61 +200,74 @@ const requestPasswordReset = async (req: Request, res: Response): Promise<Respon
         if (!user) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "No user found with that email." });
         }
+
         // Generate and send the 2FA code
-       const twoFACode = await sendTwoFactorCode(user);
-        
-       // Generate the reset token
-        const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY as string, { expiresIn: '1h' });
+        const twoFACode = await sendTwoFactorCode(user);
+
+        // Generate the reset token
+        const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY as string, { expiresIn: '1h' }); // Set expiration as needed
         user.resetPasswordToken = resetToken;
         user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
         await user.save();
-        // Create the reset link
+
+        // Create the reset link with the token
         const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-         // Send the password reset email
+        console.log(`Reset link: ${resetLink}`);
+
+        // Send the password reset email
         await sendPasswordResetEmail(user.email, resetLink, twoFACode);
         return res.json({ message: "Verification code and reset link sent: Please check your email." });
     } catch (error) {
         console.error("Error requesting password reset", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong." });
     }
-};
+}
 
 // Verify 2FA code and reset password
-const resetAccountPassword = async (req: Request, res: Response): Promise<Response> => {
+const setNewAccountPassword = async (req: Request, res: Response): Promise<Response> => {
     const { token } = req.params; // Ensure code is passed as a query parameter
-    const { password, code} = req.body;
+    const { password, code} = req.body; // Extract new password and the 2FA code from the body
     try {
+        // verify the JWT token
         const decoded: any = jwt.verify(token, process.env.JWT_SECRET_KEY as string);
         const user = await User.findOne({
             _id: decoded.id,
             resetPasswordToken: token,
             resetPasswordExpires: { $gt: Date.now() },
-        });
+        }); // Ensure the token hasn't expired
         
+        // check if user exist and the token is valid
         if (!user) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "Password reset token is invalid or has expired." });
         }
         
-                // Check if twoFactorSecret is defined
+            // Check if twoFactorSecret is defined
         if (!user.twoFactorSecret) {
             return res.status(StatusCodes.UNAUTHORIZED).json({ message: "2FA not enabled for this user." });
         }
+       
+        // Log details for debugging
+        console.log("Verifying code:", code);
+        console.log("Using secret:", user.twoFactorSecret);
+
         // Verify the 2FA code
         const valid = speakeasy.totp.verify({
             secret: user.twoFactorSecret,
             encoding: 'base32',
             token: code,
-            window: 1, // Allow a time window for the code
+            window: 2, // Allow a time window for the code
         });
         
         if (!valid) {
+            console.log("Invalid 2FA code provided");
             return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid 2FA code." });
         }
         
+        // Hash and set the new password
         user.password = await bcrypt.hash(password, 10);
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpires = undefined;
-        await user.save();
+        user.resetPasswordToken = undefined; // Clear the reset token
+        user.resetPasswordExpires = undefined; // Clear the expiration time
+        await user.save(); // Save the updated user data
         
         return res.json({ message: "Password has been reset successfully." });
     } catch (error) {
@@ -272,5 +285,5 @@ export {
     logOutUserFromHisOrHerAccount,
     deleteAccount,
     requestPasswordReset,
-    resetAccountPassword
+    setNewAccountPassword
 };
