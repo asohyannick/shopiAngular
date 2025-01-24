@@ -41,10 +41,6 @@ const verifyGeneralApplicationAuthenticationToken = (req: Request, res: Response
 };
 
 const verifySuperAdminToken = (req: Request, res: Response, next: NextFunction) => {
-    if (req.path === '/api/v1/auth/admin/signup' && req.method === 'POST') {
-        return next();
-    }
- // Extract the token from the Authorization header
     const token = req.cookies["admin_token"]; // Adjust based on your token storage
     // Check if the token exists
     if (!token) {
@@ -54,7 +50,7 @@ const verifySuperAdminToken = (req: Request, res: Response, next: NextFunction) 
     try {
         // Verify the token
         const decoded = jwt.verify(token, process.env.SUPER_ADMIN_TOKEN as string) as CustomJwtPayload; // Cast to your defined type
-
+        console.log("Decoded token:", decoded);
         // Check if the user is an admin
         if (!decoded.isAdmin) {
             return res.status(StatusCodes.FORBIDDEN).json({ message: "You do not have permission to perform this action." });

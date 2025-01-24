@@ -1,42 +1,40 @@
 import express from 'express';
-import { verifyAdminExist, verifyGeneralApplicationAuthenticationToken } from '../../middleware/auth/auth';
+import { verifyAdminExist, verifySuperAdminToken} from '../../middleware/auth/auth';
 import { createProduct, fetchAllProducts, fetchProduct, updateProduct, deleteProduct } from 
 "../../controllers/product/productController";
 const router = express.Router();
 
 router.post('/create-product',
-    verifyGeneralApplicationAuthenticationToken,
-    verifyAdminExist,
+    verifySuperAdminToken, // Verify the admin token first
+    verifyAdminExist, // Then check if the current user is an admin
     createProduct
 );
 
-
 router.get('/fetch-all-products', 
-    verifyGeneralApplicationAuthenticationToken, 
-    verifyAdminExist,
+    verifySuperAdminToken, // Verify the admin token first
+    verifyAdminExist, // Then check if the current user is an admin
     fetchAllProducts
 );
 
 
 router.get('/fetch-product/:id', 
-    verifyGeneralApplicationAuthenticationToken,
-    verifyAdminExist,  
+    verifySuperAdminToken,  // Verify the admin token first
+    verifyAdminExist,  // Then check if the current user is an admin
     fetchProduct
 )
 
 
 router.put('/update-product/:id', 
-    verifyGeneralApplicationAuthenticationToken,
-    verifyAdminExist,  
+    verifySuperAdminToken,  // Verify the admin token first
+    verifyAdminExist,  // Then check if the current user is an admin
     updateProduct
 );
 
 
 router.delete('/delete-product/:id', 
-    verifyGeneralApplicationAuthenticationToken,
-    verifyAdminExist,  
+    verifySuperAdminToken,  // Verify the admin token first
+    verifyAdminExist,  // Then check if the current user is an admin
     deleteProduct
 );
-
 
 export default router;

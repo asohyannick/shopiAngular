@@ -6,6 +6,7 @@ const createProduct = async(req:Request, res:Response): Promise<Response> => {
     if (!req.user || !req.user.isAdmin) {
         return res.status(StatusCodes.FORBIDDEN).json({message: "You are not allowed to create a product"})
     }
+    console.log("User info in controller:", req.user);
     try {
         const createOneProduct = await ProductModel.create(req.body);
         return res.status(StatusCodes.CREATED).json({
@@ -58,7 +59,10 @@ const updateProduct = async(req:Request, res:Response): Promise<Response> => {
     try {
         const updateOneProduct = await ProductModel.findByIdAndUpdate(req.params.id);
         if(!updateOneProduct) {
-            return res.status(StatusCodes.NOT_FOUND).json({message: "Product does not exist"});
+            return res.status(StatusCodes.NOT_FOUND).json({
+                message: "Product does not exist",
+                product: updateOneProduct // Return the update product
+            });
         }
         return res.status(StatusCodes.OK).json({
             message: "Product has been updated successfully!",

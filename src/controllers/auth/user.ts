@@ -141,12 +141,7 @@ const logOutUserFromHisOrHerAccount = async (req: Request, res: Response): Promi
 
 // Signup Admin
 const signUpAdmin = async (req: Request, res: Response): Promise<Response> => {
-    const { firstName, lastName, email, password } = req.body;
-
-    if (!firstName || !lastName || !email || !password) {
-        return res.status(StatusCodes.BAD_REQUEST).json({ message: "All fields are required" });
-    }
-    
+    const { firstName, lastName, email, password } = req.body;   
     try {
         // Check if the admin already exists
         const existingAdmin = await User.findOne({ email });
@@ -154,13 +149,11 @@ const signUpAdmin = async (req: Request, res: Response): Promise<Response> => {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "Admin already exists!" });
         }
         
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
         const newAdmin = new User({
             firstName,
             lastName,
             email,
-            password: hashedPassword,
+            password,
             isAdmin: true
         });
 
@@ -173,7 +166,7 @@ const signUpAdmin = async (req: Request, res: Response): Promise<Response> => {
             process.env.SUPER_ADMIN_TOKEN as string,
             { expiresIn: '1h' }
         );
-
+        console.log("Generated admin token:", token);
         // Set the cookie
         res.cookie("admin_token", token, {
             httpOnly: true,
@@ -187,6 +180,49 @@ const signUpAdmin = async (req: Request, res: Response): Promise<Response> => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong." });
     }
 };
+
+// SignIn Admin
+
+const signInAdmin = async(req:Request, res:Response) => {
+    const { email, password } = req.body;
+    try {
+        // Find the admin by email
+        const admin = await User.findOne({ email, isAdmin: true });
+
+        if (!admin) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid credentials" });
+        }
+
+        // Compare passwords
+        const matchPassword = await bcrypt.compare(password, admin.password);
+        if (!matchPassword) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid credentials" });
+        }
+
+        // Create and sign JWT token
+        // const token = jwt.sign({ userId: existingUser._id }, process.env.SUPER_ADMIN_TOKEN as string, { expiresIn: '1h' });
+        const token = jwt.sign(
+            { id: admin._id, email: admin.email, isAdmin: true },
+            process.env.SUPER_ADMIN_TOKEN as string,
+            { expiresIn: '1h' }
+        );
+
+        // Set cookie with the token
+        res.cookie("admin_token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 86400000 // 1 day
+        });
+
+        // Respond with a structured message
+        return res.status(StatusCodes.OK).json({ message: "Admin has logged in successfully", userId: admin._id });
+    } catch (error) {
+        console.error("Admin Login error:", error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });
+    }
+};
+
+// Ensure to add this to your routes;
 
 // Generate 2FA secret and send codes expired." 
 // Function to send the 2FA code
@@ -332,6 +368,7 @@ export {
     updateAccount,
     logOutUserFromHisOrHerAccount,
     signUpAdmin,
+    signInAdmin,
     deleteAccount,
     requestPasswordReset,
     setNewAccountPassword

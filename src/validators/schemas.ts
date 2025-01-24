@@ -16,7 +16,23 @@ const authLogin = Joi.object().keys({
     password: Joi.string().required(),
 });
 
+const adminSignUp = Joi.object().keys({
+    firstName: Joi.string().required(),
+    lastName: Joi.string().required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().pattern(PASSWORD_REGEX).min(8).required(),
+});
+
+
+const adminLogin = Joi.object().keys({
+    email: Joi.string().required(),
+    password: Joi.string().required(),
+});
+
+
 export default {
     "/auth/register": authRegister,
-    "/auth/login": authLogin
+    "/auth/login": authLogin,
+    "/auth/admin/signup": adminSignUp,
+    "auth/admin/signin": adminLogin 
 } as { [key: string]: ObjectSchema }
