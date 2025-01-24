@@ -1,6 +1,17 @@
-import express from 'express';
-import { verifyAdminExist, verifySuperAdminToken} from '../../middleware/auth/auth';
-import { createProduct, fetchAllProducts, fetchProduct, updateProduct, deleteProduct } from 
+import  express, { Request, Response, NextFunction } from 'express';
+import { 
+    verifyAdminExist, 
+    verifySuperAdminToken,
+    verifyGeneralApplicationAuthenticationToken,
+} from '../../middleware/auth/auth';
+import { 
+    createProduct, 
+    fetchAllProducts, 
+    fetchProduct, 
+    updateProduct, 
+    deleteProduct, 
+    searchProducts 
+} from 
 "../../controllers/product/productController";
 const router = express.Router();
 
@@ -37,4 +48,17 @@ router.delete('/delete-product/:id',
     deleteProduct
 );
 
+router.get('/search-products',
+    verifyGeneralApplicationAuthenticationToken,  // Check if user is authenticated 
+    (req:Request, res:Response, next:NextFunction) => {
+     if (req.user  && req.user.isAdmin) {
+        // If the user is and admin, skip the next two middleware
+        return next();
+     }
+     // If not an admin, continue to check for other conditions 
+     return verifySuperAdminToken(req, res, next);
+    }, 
+    verifyAdminExist,
+    searchProducts
+);
 export default router;

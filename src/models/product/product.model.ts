@@ -2,10 +2,6 @@ import { productType } from './../../types/productType/productType';
 import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema<productType>({
-    userId:{
-        type:String,
-        required: true,
-    },
     name:{
         type:String,
         required: true
@@ -25,6 +21,10 @@ const productSchema = new mongoose.Schema<productType>({
     country:{
         type:String,
         required: true,
+    },
+    category: {
+      type: String, // Add this field
+      required: true,
     },
     rating:{
         type:Number,

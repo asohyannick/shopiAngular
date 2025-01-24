@@ -1,12 +1,12 @@
 import { Document } from 'mongoose';
 // src/types/express.d.ts
 export interface productType extends Document {
-userId:string;
 name: string;
 description: string;
 quantity: number;
 price: number;
 country: string;
+category: string;
 rating: number;
 posted_Date: Date;
 brand: string;
