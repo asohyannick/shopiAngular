@@ -1,7 +1,10 @@
 import { productType } from './../../types/productType/productType';
 import mongoose from "mongoose";
-
 const productSchema = new mongoose.Schema<productType>({
+    _id:{
+        type: mongoose.Schema.Types.ObjectId,
+        auto: true,
+    },
     name:{
         type:String,
         required: true

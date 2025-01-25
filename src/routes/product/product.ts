@@ -37,7 +37,7 @@ router.get('/fetch-product/:id',
     verifySuperAdminToken,  // Verify the admin token first
     verifyAdminExist,  // Then check if the current user is an admin
     fetchProduct
-)
+);
 
 
 router.put('/update-product/:id', 

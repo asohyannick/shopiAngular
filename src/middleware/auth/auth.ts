@@ -21,8 +21,6 @@ declare global {
 }
 
 const verifyGeneralApplicationAuthenticationToken = (req: Request, res: Response, next: NextFunction) => {
-    console.log("Middleware: Checking authentication...");
-
     const token = req.cookies["auth_token"]; // Adjust based on your token storage
     if (!token) {
         return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Access Denied!" });
@@ -32,11 +30,10 @@ const verifyGeneralApplicationAuthenticationToken = (req: Request, res: Response
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY as string) as CustomJwtPayload;
         req.userId = decoded.userId;
         req.user = { id: req.userId, isAdmin: decoded.isAdmin }; // Ensure this is set correctly
-        console.log("User authenticated:", req.user);
-        next(); // Proceed to the next middleware or controller
+        next(); // Proceed to the next middleware 
     } catch (error) {
         console.error("Token verification failed:", error);
-        return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Access Denied!" });
+        return res.status(StatusCodes.UNAUTHORIZED).json({ message:"Access Denied!"});
     }
 };
 
@@ -50,7 +47,6 @@ const verifySuperAdminToken = (req: Request, res: Response, next: NextFunction) 
     try {
         // Verify the token
         const decoded = jwt.verify(token, process.env.SUPER_ADMIN_TOKEN as string) as CustomJwtPayload; // Cast to your defined type
-        console.log("Decoded token:", decoded);
         // Check if the user is an admin
         if (!decoded.isAdmin) {
             return res.status(StatusCodes.FORBIDDEN).json({ message: "You do not have permission to perform this action." });
@@ -63,7 +59,7 @@ const verifySuperAdminToken = (req: Request, res: Response, next: NextFunction) 
             isAdmin: decoded.isAdmin,
         };
 
-        next(); // Call the next middleware or route handler
+        next(); // Call the next middleware
     } catch (error) {
         console.error("Token verification error:", error);
         return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid token." });
@@ -73,14 +69,11 @@ const verifySuperAdminToken = (req: Request, res: Response, next: NextFunction) 
 // Middleware to check if user is admin
 const verifyAdminExist = (req: Request, res: Response, 
 next: NextFunction) => {
- console.log("Checking admin status for user:", req.user);
     if (!req.user || !req.user.isAdmin) {
-        console.log("Access denied: User is not an admin.");
         return res.status(StatusCodes.FORBIDDEN).json({ message: "Access denied" });
     }
     next();
 };
-
 
 export {
     verifyGeneralApplicationAuthenticationToken,

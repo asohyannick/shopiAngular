@@ -28,7 +28,9 @@ const registerAccount = async (req: Request, res: Response) => {
         });
 
         // Respond with success message
-        return res.status(StatusCodes.CREATED).json({ message: "User has been created successfully." });
+        return res.status(StatusCodes.CREATED).json({
+            message: "User has been created successfully."
+        });
     } catch (error) {
         console.error("Registration error:", error); // More context in error logs
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong." });
@@ -51,7 +53,7 @@ const loginAccount = async (req: Request, res: Response) => {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid credentials" });
         }
 
-    // Create and sign JWT token with user's isAdmin status
+    // Create and sign in the user with the  JWT token  
     const token = jwt.sign({ userId: existingUser._id}, process.env.JWT_SECRET_KEY as string, { expiresIn: "1d" });
 
         // Set cookie with the token
@@ -62,7 +64,10 @@ const loginAccount = async (req: Request, res: Response) => {
         });
 
         // Respond with a structured message
-        return res.status(StatusCodes.OK).json({ message: "Login successful", userId: existingUser._id });
+        return res.status(StatusCodes.OK).json({ 
+            message: "User has been logged in successfully.", 
+            userId: existingUser._id 
+        });
     } catch (error) {
         console.error("Login error:", error); // Log the error for debugging
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });
@@ -72,7 +77,10 @@ const loginAccount = async (req: Request, res: Response) => {
 const fetchAllAccounts = async (req: Request, res: Response): Promise<Response> => {
     try {
         const users = await User.find();
-        return res.status(StatusCodes.OK).json(users);
+        return res.status(StatusCodes.OK).json({
+            message: "Users have been fetched successfully",
+            users
+        });
     } catch (error) {
         console.error("Fetch all accounts error:", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong." });
@@ -85,7 +93,10 @@ const fetchAnAccount = async (req: Request, res: Response): Promise<Response> =>
         if (!user) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
         }
-        return res.json(user); // This line was unreachable
+        return res.status(StatusCodes.OK).json({
+            message: "User has been fetched successfully",
+            user
+        }); 
     } catch (error) {
         console.error('Error fetching user:', error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });
@@ -103,7 +114,10 @@ const updateAccount = async (req: Request, res: Response): Promise<Response> => 
         if (!updatedAccount) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: "User account not found" });
         }
-        return res.json(updatedAccount); // This line was unreachable
+        return res.status(StatusCodes.OK).json({
+            message: "User has been updated successfully.",
+            updatedAccount
+        }); 
     } catch (error) {
         console.error("Error updating user account", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });
@@ -116,14 +130,17 @@ const deleteAccount = async (req: Request, res: Response): Promise<Response> => 
         if (!deletedAccount) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
         }
-        return res.json({ message: "Account has been deleted successfully", user: deletedAccount });
+        return res.status(StatusCodes.OK).json({ 
+            message: "Account has been deleted successfully", 
+            user: deletedAccount
+        });
     } catch (error) {
         console.error("Error deleting user account", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });
     }
 };
 
-const logOutUserFromHisOrHerAccount = async (req: Request, res: Response): Promise<Response> => {
+const userLogout = async(req: Request, res: Response): Promise<Response> => {
     try {
         // Clear the authentication cookie
         res.cookie("auth_token", "", {
@@ -148,7 +165,6 @@ const signUpAdmin = async (req: Request, res: Response): Promise<Response> => {
         if (existingAdmin) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "Admin already exists!" });
         }
-        
         const newAdmin = new User({
             firstName,
             lastName,
@@ -156,17 +172,14 @@ const signUpAdmin = async (req: Request, res: Response): Promise<Response> => {
             password,
             isAdmin: true
         });
-
         // Save the new admin user
         await newAdmin.save();
-
         // Generate the token
         const token = jwt.sign(
             { id: newAdmin._id, email: newAdmin.email, isAdmin: newAdmin.isAdmin },
             process.env.SUPER_ADMIN_TOKEN as string,
             { expiresIn: '1h' }
         );
-        console.log("Generated admin token:", token);
         // Set the cookie
         res.cookie("admin_token", token, {
             httpOnly: true,
@@ -200,7 +213,6 @@ const signInAdmin = async(req:Request, res:Response) => {
         }
 
         // Create and sign JWT token
-        // const token = jwt.sign({ userId: existingUser._id }, process.env.SUPER_ADMIN_TOKEN as string, { expiresIn: '1h' });
         const token = jwt.sign(
             { id: admin._id, email: admin.email, isAdmin: true },
             process.env.SUPER_ADMIN_TOKEN as string,
@@ -222,11 +234,34 @@ const signInAdmin = async(req:Request, res:Response) => {
     }
 };
 
-// Ensure to add this to your routes;
+// Admin logout
+const adminLogout = async(req: Request, res: Response): Promise<Response> => {
+    try {
+        // Clear the authentication cookie
+        res.cookie("admin_token", "", {
+            expires: new Date(0),
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict"
+        });
+        return res.status(StatusCodes.OK).json({ message: "User has been logged out successfully" });
+    } catch (error) {
+        console.error("Logout error", error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while logging out." });
+    }
+}
 
 // Generate 2FA secret and send codes expired." 
-// Function to send the 2FA code
-const sendVerificationCode = async (email: string, token: string) => { // Done here with the functionality
+const sendTwoFactorCode = async (user: any) => {
+    const secret = speakeasy.generateSecret({ length: 20 });
+    user.twoFactorSecret = secret.base32; // Save this in the user's record
+    await user.save();
+    const token = speakeasy.totp({ secret: user.twoFactorSecret, encoding: 'base32' });
+    await sendVerificationCode(user.email, token); // Send the code
+    return token; // Return the 2FA token for later use
+};
+// Function to verify the authenticity of the 2FA secret code which has been generated
+const sendVerificationCode = async (email: string, token: string) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -241,7 +276,6 @@ const sendVerificationCode = async (email: string, token: string) => { // Done h
     };
     return transporter.sendMail(mailOptions);
 };
-
 
 // Function to send the password reset email
 const sendPasswordResetEmail = async (email: string, resetLink: string, twoFACode: string) => {
@@ -263,16 +297,6 @@ const sendPasswordResetEmail = async (email: string, resetLink: string, twoFACod
                 <p>If you did not request this, please ignore this email.</p>`,
     };
     return transporter.sendMail(mailOptions);
-};
-
-// Generate and send 2FA code
-const sendTwoFactorCode = async (user: any) => {
-    const secret = speakeasy.generateSecret({ length: 20 });
-    user.twoFactorSecret = secret.base32; // Save this in the user's record
-    await user.save();
-    const token = speakeasy.totp({ secret: user.twoFactorSecret, encoding: 'base32' });
-    await sendVerificationCode(user.email, token); // Send the code
-    return token; // Return the 2FA token for later use
 };
 
 
@@ -300,7 +324,7 @@ const requestPasswordReset = async (req: Request, res: Response): Promise<Respon
 
         // Send the password reset email
         await sendPasswordResetEmail(user.email, resetLink, twoFACode);
-        return res.json({ message: "Verification code and reset link sent: Please check your email." });
+        return res.status(StatusCodes.OK).json({ message: "Verification code and reset link sent: Please check your email." });
     } catch (error) {
         console.error("Error requesting password reset", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong." });
@@ -330,10 +354,6 @@ const setNewAccountPassword = async (req: Request, res: Response): Promise<Respo
             return res.status(StatusCodes.UNAUTHORIZED).json({ message: "2FA not enabled for this user." });
         }
        
-        // Log details for debugging
-        console.log("Verifying code:", code);
-        console.log("Using secret:", user.twoFactorSecret);
-
         // Verify the 2FA code
         const valid = speakeasy.totp.verify({
             secret: user.twoFactorSecret,
@@ -343,7 +363,6 @@ const setNewAccountPassword = async (req: Request, res: Response): Promise<Respo
         });
         
         if (!valid) {
-            console.log("Invalid 2FA code provided");
             return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid 2FA code." });
         }
         
@@ -352,8 +371,8 @@ const setNewAccountPassword = async (req: Request, res: Response): Promise<Respo
         user.resetPasswordToken = undefined; // Clear the reset token
         user.resetPasswordExpires = undefined; // Clear the expiration time
         await user.save(); // Save the updated user data
-        
-        return res.json({ message: "Password has been reset successfully." });
+
+        return res.status(StatusCodes.OK).json({ message: "Password has been reset successfully." });
     } catch (error) {
         console.error('Error resetting password', error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong." });
@@ -366,10 +385,11 @@ export {
     fetchAllAccounts,
     fetchAnAccount,
     updateAccount,
-    logOutUserFromHisOrHerAccount,
+    deleteAccount,
+    userLogout,
     signUpAdmin,
     signInAdmin,
-    deleteAccount,
+    adminLogout,
     requestPasswordReset,
     setNewAccountPassword
 };

@@ -1,20 +1,26 @@
 import mongoose from "mongoose";
 import { UserType } from "../../types/userType/userType";
 import bcrypt from 'bcryptjs';
-
 const userModel = new mongoose.Schema<UserType>({
+    _id: {
+        type:mongoose.Schema.Types.ObjectId,
+        auto: true,
+    },
     firstName: {
         type: String,
-        required: true
+        required: true,
+        min: 3,
     },
     lastName: {
         type: String,
-        required: true
+        required: true,
+        min: 3,
     },
     email: {
         type: String,
         required: true,
         unique: true,
+        max: 250,
     },
     password: {
         type: String,
@@ -26,10 +32,18 @@ const userModel = new mongoose.Schema<UserType>({
     required: true,
     default:false
 },
-    resetPasswordToken: {type: String},
-    resetPasswordExpires: {type: Date},
-    twoFactorSecret: {type: String},
-    isTwoFactorEnabled: {type: Boolean}
+    resetPasswordToken: {
+        type: String
+    },
+    resetPasswordExpires: {
+        type: Date
+    },
+    twoFactorSecret: {
+        type: String
+    },
+    isTwoFactorEnabled: {
+        type: Boolean
+    }
 }, { timestamps: true })
 userModel.pre<UserType>('save', async function (next) {
     // Check if password is modified or if it's a new document

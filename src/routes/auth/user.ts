@@ -5,10 +5,11 @@ import {
     fetchAllAccounts,
     fetchAnAccount, 
     updateAccount, 
-    logOutUserFromHisOrHerAccount,
+    deleteAccount, 
+    userLogout,
     signUpAdmin,
     signInAdmin,
-    deleteAccount, 
+    adminLogout,
     requestPasswordReset, 
     setNewAccountPassword,
 } from '../../controllers/auth/user';
@@ -60,7 +61,7 @@ router.post("/set-new-password/:token",
 router.post(
     "/logout", 
     verifyGeneralApplicationAuthenticationToken,
-    logOutUserFromHisOrHerAccount
+    userLogout
 );
 router.post(
     "/admin/signup",
@@ -72,4 +73,8 @@ router.post(
     schemaValidator("auth/admin/signin"),
     signInAdmin
 );
+router.post(
+    '/admin/logout',
+    adminLogout // Test this API endpoint before marking it as DONE.
+)
 export default router;

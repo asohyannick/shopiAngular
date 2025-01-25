@@ -1,6 +1,6 @@
 import { NextFunction, Response, Request, RequestHandler } from 'express';
 import schemas from '../../validators/schemas';
-
+import { StatusCodes } from 'http-status-codes';
 interface ValidationError {
     message: string;
     type: string;
@@ -61,9 +61,8 @@ const schemaValidator = (path: string, useJoiError = true): RequestHandler => {
                 },
             };
 
-            return res.status(422).json(useJoiError ? joiError : customError);
+            return res.status(StatusCodes.BAD_REQUEST).json(useJoiError ? joiError : customError);
         }
-
         // validation successful
         req.body = value;
         return next();

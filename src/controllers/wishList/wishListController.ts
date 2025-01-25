@@ -62,7 +62,7 @@ const fetchUserWishLists = async(req:Request, res:Response): Promise<Response> =
       return res.status(StatusCodes.CREATED).json({message: "Wishlists has been fetched successfully", wishList: wishLists})
    } catch (error) {
     console.error("Error occurred while fetching  wishlists", error);
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });    
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });
   }
 } 
 
@@ -206,7 +206,7 @@ const searchWishlists = async(req:Request, res:Response): Promise<Response> => {
     if (tags) {
         //Type assertion to ensure tags is treated as a string
         const tagArray = Array.isArray(tags) ? tags : [tags];
-        query.tags = {$in: tagArray.map(tag => tag.toString())}; // Split tags by comma for multiple values
+        query.tags = {$in: tagArray.map(tag => tag.toString())};
     }
     try {
         const wishlists = await WishListModel.find(query).populate('products');
