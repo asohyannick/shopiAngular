@@ -7,6 +7,7 @@ import cors from 'cors';
 // routes
 import authRoute from "./routes/auth/user";
 import productRoute from './routes/product/product';
+import wishListRoute from './routes/wishList/wishList';
 // DB 
 import connectToDatabase from './config/connectDB';
 const app: Application = express();
@@ -27,6 +28,8 @@ app.use(cors());
 // Routes Registration
 app.use(`/api/${process.env.API_VERSION}/auth`, authRoute);
 app.use(`/api/${process.env.API_VERSION}/product`, productRoute);
+app.use(`/api/${process.env.API_VERSION}/wishlist`, wishListRoute);
+
 
 // Database Registration
 async function serve() {

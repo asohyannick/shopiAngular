@@ -1,6 +1,15 @@
-import { Document } from 'mongoose';
-// src/types/express.d.ts
+import { Document, Types } from 'mongoose';
+
+export interface ReviewType {
+    _id: Types.ObjectId; // MongoDB ObjectId as string
+    username: string;
+    reviewText: string;
+    rating: number;
+    reviewDate: Date;
+}
+
 export interface productType extends Document {
+_id: Types.ObjectId;
 name: string;
 description: string;
 quantity: number;
@@ -24,10 +33,5 @@ dimensions:{
 warrantyPeriod: string;  // Duration of warranty
 returnPolicy: string;    // Description of the return policy
 tags: string[];          // Array of tags for better searchability
-customerReviews: {       // Object to hold customer reviews
-    username: string;
-    reviewText: string;
-    rating: number;
-    reviewDate: Date;
-}[];     
+customerReviews: ReviewType[]       // Object to hold customer reviews    
 }

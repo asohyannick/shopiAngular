@@ -1,7 +1,9 @@
 import { Request, Response  } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import ProductModel from "../../models/product/product.model";
+import mongoose from 'mongoose';
 import { ParsedQs } from 'qs';
+import { ReviewType } from '../../types/productType/productType';
 
 const createProduct = async(req:Request, res:Response): Promise<Response> => {
     if (!req.user || !req.user.isAdmin) {
@@ -50,8 +52,6 @@ const fetchProduct = async(req:Request, res:Response): Promise<Response> => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({message: "Something went wrong"});
     }
 }
-
-
 
 const updateProduct = async(req:Request, res:Response): Promise<Response> => {
     if (!req.user || !req.user.isAdmin) {
@@ -212,11 +212,126 @@ const searchProducts = async (req: Request<{}, {}, {}, ParsedQs>, res: Response)
     }
 }
 
+const createReview = async(req:Request, res:Response): Promise<Response> => {
+    const { productId } = req.params;
+    const {username, reviewText, rating } = req.body;
+    try {
+        const product = await ProductModel.findById(productId);
+        if (!product) {
+            return res.status(StatusCodes.NOT_FOUND).json({message: "Product not found"});
+        }
+    const newReview: ReviewType = {
+        _id: new mongoose.Types.ObjectId(),
+        username,
+        reviewText,
+        rating,
+        reviewDate: new Date()
+    };
+    product.customerReviews.push(newReview);
+    await product.save();
+    return res.status(StatusCodes.CREATED).json({
+        message: "Review has been created successfully!",
+        review: newReview
+    });
+    } catch (error) {
+      console.error("Error occurred while creating a review", error);
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });  
+    }
+}
+
+const fetchAllReviews = async(req:Request, res:Response): Promise<Response> => {
+    const {productId } = req.params;
+  try {
+    const product = await ProductModel.findById(productId);
+    if (!product) {
+        return res.status(StatusCodes.NOT_FOUND).json({message: "Product not found"});
+    }
+    return res.status(StatusCodes.CREATED).json({ reviews: product.customerReviews});
+  } catch (error) {
+    console.error("Error occurred while fetching all reviews", error);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });  
+  }
+}
+
+const fetchReview = async(req:Request, res:Response): Promise<Response> => {
+    const { productId, reviewId } = req.params;
+    try {
+        const product = await ProductModel.findById(productId);
+        if (!product) {
+            return res.status(StatusCodes.NOT_FOUND).json({ message: "Product not found "});
+        }
+        // Use the _id property to find the specific review
+         // Use the _id property to find the specific review
+    const review = product.customerReviews.find((review) => review._id.toString() === reviewId);
+    if (!review) {
+        return res.status(StatusCodes.NOT_FOUND).json({message: "Review not found" });
+    }
+    return res.status(StatusCodes.OK).json({ review });
+    } catch (error) {
+       console.error("Error occurred while fetching a review", error);
+       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });  
+    }
+}
+
+const updateReview = async(req: Request, res:Response): Promise<Response> => {
+    const { productId, reviewId } = req.params;
+    const { reviewText, rating } = req.body;
+    try {
+        const product = await ProductModel.findById(productId);
+        if (!product) {
+            return res.status(StatusCodes.NOT_FOUND).json({ message: "Review not found" });
+        }
+    const review = product.customerReviews.find((review) => review._id.toString() === reviewId);
+    if (!review) {
+        return res.status(StatusCodes.NOT_FOUND).json({ message: "Review not found" });
+    }
+    review.reviewText = reviewText;
+    review.rating = rating;
+    review.reviewDate = new Date(); // Update review date
+    await product.save();
+    return res.status(StatusCodes.OK).json({message: "Review has been updated successfully!", review});
+    } catch (error) {
+        console.error("Error occurred while updating a review", error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });  
+    }
+
+}
+
+const deleteReview = async(req: Request, res:Response) => {
+    const { productId, reviewId } = req.params;
+ try {
+    const product = await ProductModel.findById(productId);
+    if (!product) {
+        return res.status(StatusCodes.NOT_FOUND).json({message: "Product not found"});
+    }
+        // Use the _id property to find the specific review
+         // Find the index of the review to delete
+    const reviewIndex = product.customerReviews.findIndex((review) => review._id.toString() === reviewId);
+    if (reviewIndex === -1) {
+            return res.status(404).json({ message: 'Review not found' });
+    }
+    product.customerReviews.splice(reviewIndex, 1); // Remove the review
+    await product.save(); // Save changes to the product
+    return res.status(StatusCodes.OK).json({message: "Review has been deleted successfully!"});
+ } catch (error) {
+    console.error("Error occurred while deleting a review", error);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });  
+ }
+}
+
+
+
+
 export {
     createProduct,
     fetchAllProducts,
     fetchProduct,
     updateProduct,
     deleteProduct,
-    searchProducts
+    searchProducts,
+    createReview,
+    fetchAllReviews,
+    fetchReview,
+    updateReview,
+    deleteReview
 }

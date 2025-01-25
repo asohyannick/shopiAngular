@@ -10,7 +10,12 @@ import {
     fetchProduct, 
     updateProduct, 
     deleteProduct, 
-    searchProducts 
+    searchProducts ,
+    createReview, 
+    fetchAllReviews,
+    fetchReview,
+    updateReview,
+    deleteReview
 } from 
 "../../controllers/product/productController";
 const router = express.Router();
@@ -60,5 +65,70 @@ router.get('/search-products',
     }, 
     verifyAdminExist,
     searchProducts
+);
+
+router.post("/:productId/create-reviews", 
+    verifyGeneralApplicationAuthenticationToken, // Check if user is authenticated
+    (req:Request, res:Response, next:NextFunction) => {
+    if (req.user  && req.user.isAdmin) {
+     // If the user is and admin, skip the next two middleware
+     return next();
+    }
+  // If not an admin, continue to check for other conditions 
+  return verifySuperAdminToken(req, res, next);
+ }, 
+    createReview
+);
+
+router.get("/:productId/fetch-reviews", 
+    verifyGeneralApplicationAuthenticationToken, // Check if user is authenticated
+    (req:Request, res:Response, next:NextFunction) => {
+    if (req.user  && req.user.isAdmin) {
+     // If the user is and admin, skip the next two middleware
+     return next();
+    }
+  // If not an admin, continue to check for other conditions 
+  return verifySuperAdminToken(req, res, next);
+ }, 
+    fetchAllReviews
+);
+
+router.get("/:productId/fetch-review/:reviewId", 
+    verifyGeneralApplicationAuthenticationToken, // Check if user is authenticated
+    (req:Request, res:Response, next:NextFunction) => {
+    if (req.user  && req.user.isAdmin) {
+     // If the user is and admin, skip the next two middleware
+     return next();
+    }
+  // If not an admin, continue to check for other conditions 
+  return verifySuperAdminToken(req, res, next);
+ }, 
+    fetchReview
+);
+
+router.put("/:productId/update-review/:reviewId", 
+    verifyGeneralApplicationAuthenticationToken, // Check if user is authenticated
+    (req:Request, res:Response, next:NextFunction) => {
+    if (req.user  && req.user.isAdmin) {
+     // If the user is and admin, skip the next two middleware
+     return next();
+    }
+  // If not an admin, continue to check for other conditions 
+  return verifySuperAdminToken(req, res, next);
+ }, 
+    updateReview
+);
+
+router.delete("/:productId/delete-review/:reviewId", 
+    verifyGeneralApplicationAuthenticationToken, // Check if user is authenticated
+    (req:Request, res:Response, next:NextFunction) => {
+    if (req.user  && req.user.isAdmin) {
+     // If the user is and admin, skip the next two middleware
+     return next();
+    }
+  // If not an admin, continue to check for other conditions 
+  return verifySuperAdminToken(req, res, next);
+ }, 
+    deleteReview
 );
 export default router;

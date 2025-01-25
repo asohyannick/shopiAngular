@@ -88,6 +88,10 @@ const productSchema = new mongoose.Schema<productType>({
         required: true,
     },
 customerReviews: [{
+_id:{
+    type: mongoose.Schema.Types.ObjectId,
+    auto: true
+},
 username:{
     type: String,
     required: true,
