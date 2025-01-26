@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
-import { UserType } from "../../types/userType/userType";
+import { UserType, CartProduct } from "../../types/userType/userType";
 import bcrypt from 'bcryptjs';
-const userModel = new mongoose.Schema<UserType>({
+// Define the CartProduct interface
+
+const userModel = new mongoose.Schema<UserType & {cart: CartProduct[] }>({
     _id: {
         type:mongoose.Schema.Types.ObjectId,
         auto: true,
@@ -43,7 +45,19 @@ const userModel = new mongoose.Schema<UserType>({
     },
     isTwoFactorEnabled: {
         type: Boolean
-    }
+    },
+    cart:[{
+        productId:{
+            type: mongoose.Schema.ObjectId,
+            ref: 'Product', // Reference to the Product model
+            required: true,
+        },
+        quantity:{
+            type:Number,
+            required: true,
+            default: 1,
+        },
+    }],
 }, { timestamps: true })
 userModel.pre<UserType>('save', async function (next) {
     // Check if password is modified or if it's a new document

@@ -45,6 +45,7 @@
     "nodemon": "^3.1.9",
     "ora": "^8.1.1",
     "response-time": "^2.3.2",
+    "socket.io": "^4.8.1",
     "speakeasy": "^2.0.0",
     "stripe": "^16.11.0",
     "winston": "^3.3.3",

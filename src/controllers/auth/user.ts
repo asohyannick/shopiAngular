@@ -66,7 +66,13 @@ const loginAccount = async (req: Request, res: Response) => {
         // Respond with a structured message
         return res.status(StatusCodes.OK).json({ 
             message: "User has been logged in successfully.", 
-            userId: existingUser._id 
+            userId: existingUser._id,
+            existingUser: {
+                firstName: existingUser.firstName,
+                lastName: existingUser.lastName,
+                email: existingUser.email,
+                cart: existingUser.cart // Send the cart along with user data
+            }
         });
     } catch (error) {
         console.error("Login error:", error); // Log the error for debugging
