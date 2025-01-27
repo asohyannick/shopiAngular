@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-import { UserType, CartProduct } from "../../types/userType/userType";
+import { AuthType, CartProduct } from "../../types/authType/authType";
 import bcrypt from 'bcryptjs';
 // Define the CartProduct interface
 
-const userModel = new mongoose.Schema<UserType & {cart: CartProduct[] }>({
+const authSchema = new mongoose.Schema<AuthType & {cart: CartProduct[] }>({
     _id: {
         type:mongoose.Schema.Types.ObjectId,
         auto: true,
@@ -58,8 +58,13 @@ const userModel = new mongoose.Schema<UserType & {cart: CartProduct[] }>({
             default: 1,
         },
     }],
+    active:{
+        type:Boolean,
+        required: true,
+        default: true,
+    },
 }, { timestamps: true })
-userModel.pre<UserType>('save', async function (next) {
+authSchema.pre<AuthType>('save', async function (next) {
     // Check if password is modified or if it's a new document
     if (!this.isModified('password')) return next();
 
@@ -67,5 +72,5 @@ userModel.pre<UserType>('save', async function (next) {
     this.password = await bcrypt.hash(this.password, salt);
     next();
 })
-const User = mongoose.model<UserType>('User', userModel);
-export default User;
+const Auth = mongoose.model<AuthType>('Auth', authSchema);
+export default Auth;

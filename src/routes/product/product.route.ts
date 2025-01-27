@@ -15,7 +15,12 @@ import {
     fetchAllReviews,
     fetchReview,
     updateReview,
-    deleteReview
+    deleteReview,
+    fetchAllUsers,
+    fetchAUser,
+    updateAUser,
+    deleteAUser,
+    activateUserAccount
 } from 
 "../../controllers/product/productController";
 const router = express.Router();
@@ -130,5 +135,35 @@ router.delete("/:productId/delete-review/:reviewId",
   return verifySuperAdminToken(req, res, next);
  }, 
     deleteReview
+);
+
+router.get('/all-users',
+    verifySuperAdminToken,
+    verifyAdminExist,
+    fetchAllUsers
+);
+
+router.get('/users/:id',
+    verifySuperAdminToken,
+    verifyAdminExist,
+    fetchAUser
+);
+
+router.put('/update-users/:id',
+    verifySuperAdminToken,
+    verifyAdminExist,
+    updateAUser
+);
+
+router.delete('/delete-users/:id',
+    verifySuperAdminToken,
+    verifyAdminExist,
+    deleteAUser
+);
+
+router.put('/activate-account/:userId/status',
+    verifySuperAdminToken,
+    verifyAdminExist,
+    activateUserAccount
 );
 export default router;

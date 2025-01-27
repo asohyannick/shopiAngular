@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import WishListModel from "../../models/wishList/wishList";
-import User from "../../models/user/user.model";
+import WishListModel from "../../models/wishList/wishList.model";
+import Auth from "../../models/auth/auth.model";
 import { StatusCodes } from "http-status-codes";
 
 const createWishList = async(req:Request, res:Response): Promise<Response> => {
@@ -47,7 +47,7 @@ const createWishList = async(req:Request, res:Response): Promise<Response> => {
             tags,});
         await newWishList.save();
         // Update the user's wishlists Array
-        await User.findByIdAndUpdate(userId, {$push: {wishlists: newWishList._id}});
+        await Auth.findByIdAndUpdate(userId, {$push: {wishlists: newWishList._id}});
         return res.status(StatusCodes.CREATED).json({message: "Wishlist has been created successfully.", newWishList})
     } catch (error) {
         console.error("Error occurred while creating a wishlist", error);
@@ -114,7 +114,7 @@ const deleteWishList = async(req:Request, res:Response): Promise<Response> => {
         if (!removeWishlist) {
             return res.status(StatusCodes.NOT_FOUND).json({message: "Wishlist not found!"});
         }
-        await User.findByIdAndUpdate(userId, {$pull: {wishlists: wishlistId }});
+        await Auth.findByIdAndUpdate(userId, {$pull: {wishlists: wishlistId }});
      return res.status(StatusCodes.OK).json({message: "Wishlist has been deleted successfully!"})
     } catch (error) {
         console.error("Error occurred while deleting  wishlist", error);

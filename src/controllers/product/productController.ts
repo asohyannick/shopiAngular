@@ -1,6 +1,7 @@
 import { Request, Response  } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import ProductModel from "../../models/product/product.model";
+import Auth from '../../models/auth/auth.model';
 import mongoose from 'mongoose';
 import { ParsedQs } from 'qs';
 import { ReviewType } from '../../types/productType/productType';
@@ -318,6 +319,71 @@ const deleteReview = async(req: Request, res:Response) => {
  }
 }
 
+const fetchAllUsers = async(req:Request, res:Response): Promise<Response> => {
+ try {
+    const users = await Auth.find();
+    return res.status(StatusCodes.OK).json({message: "Users have been fetched successfully", users}); 
+ } catch (error) {
+    console.error("Error occurred while fetching all authenticated users", error);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });  
+ }
+}
+
+const fetchAUser = async(req:Request, res:Response): Promise<Response> => {
+    const { id } = req.params;
+ try {
+    const user = await Auth.findById(id);
+    if(!user) {
+      return res.status(StatusCodes.NOT_FOUND).json({message: "User not found"});
+    }
+    return res.status(StatusCodes.OK).json({message: "User has been fetched  successfully", user});
+ } catch (error) {
+    console.error("Error occurred while fetching an authenticated user", error);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });  
+ }
+}
+
+const updateAUser = async(req:Request, res:Response): Promise<Response> => {
+    const {id} = req.params;
+ try {
+    const updatedUser = await Auth.findByIdAndUpdate(id, req.body, {new: true});
+    if(!updatedUser) {
+        return res.status(StatusCodes.NOT_FOUND).json({message: "User not found"});
+    }
+    return res.status(StatusCodes.OK).json({message: "User has been updated successfully.", updatedUser});
+ } catch (error) {
+    console.error("Error occurred while updating an authenticated user", error);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });  
+ }
+}
+
+const deleteAUser = async(req:Request, res:Response): Promise<Response> => {
+const {id} = req.params;
+ try {
+    const user = await Auth.findByIdAndDelete(id);
+    if(!user) {
+        return res.status(StatusCodes.OK).json({message: "User has found"});
+    }
+    return res.status(StatusCodes.OK).json({message: "User has been deleted successfully", user})
+ } catch (error) {
+    console.error("Error occurred while deleting an authenticated user", error);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });  
+ }
+}
+
+const activateUserAccount = async(req:Request, res:Response): Promise<Response> => {
+    const {active } = req.body;
+try { 
+    const user = await Auth.findByIdAndUpdate(req.params.id, {active}, {new: true});
+    if(!user) {
+       return res.status(StatusCodes.NOT_FOUND).json({message: "User account not found"});
+    }
+    return res.status(StatusCodes.OK).json({message: "User account has been activated", user});
+} catch (error) {
+    console.error("Error occurred while activating an authenticated user's account", error);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });  
+}
+}
 
 export {
     createProduct,
@@ -330,5 +396,10 @@ export {
     fetchAllReviews,
     fetchReview,
     updateReview,
-    deleteReview
+    deleteReview,
+    fetchAllUsers,
+    fetchAUser,
+    updateAUser,
+    deleteAUser,
+    activateUserAccount
 }

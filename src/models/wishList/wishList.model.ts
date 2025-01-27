@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
-const wishListSchema = new mongoose.Schema({
+import { WishListType } from "../../types/wishListType/wishListType";
+const wishListSchema = new mongoose.Schema<WishListType>({
     userId: {
         type:mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: 'User', // Reference to the User model
+        ref: 'Auth', // Reference to the Auth model
     },
     name: {
         type:String,
@@ -15,7 +16,7 @@ const wishListSchema = new mongoose.Schema({
     }],
     sharedWith: [{
      type: mongoose.Schema.Types.ObjectId,
-     ref: 'User', // Reference to users with whom the wishlist is shared
+     ref: 'Auth', // Reference to auth with whom the wishlist is shared
     }],
     category:{
         type: String, // Field to store the category of the wishlist
@@ -62,6 +63,6 @@ const wishListSchema = new mongoose.Schema({
     }],
 }, {timestamps: true}); 
 
-const WishListModel = mongoose.model('WishList', wishListSchema);
+const WishListModel = mongoose.model<WishListType>('WishList', wishListSchema);
 
 export  default WishListModel;

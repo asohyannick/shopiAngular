@@ -3,7 +3,7 @@ export interface CartProduct {
     productId:Types.ObjectId;
     quantity: number;
 }
-export interface UserType extends Document {
+export interface AuthType extends Document {
     _id: Types.ObjectId;
     firstName: string;
     lastName: string;
@@ -15,5 +15,6 @@ export interface UserType extends Document {
     twoFactorSecret?: string; // Store the secret for 2SV
     isTwoFactorEnabled: boolean; // Flag to check if 2SV is enabled
     wishlist:Types.ObjectId[]; // Reference to the Wishlist
-    cart: CartProduct[] 
+    cart: CartProduct[] ;
+    active: boolean;
 }

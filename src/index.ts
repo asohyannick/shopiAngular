@@ -7,10 +7,12 @@ import 'dotenv/config';
 import helmet from 'helmet';
 import cors from 'cors';
 // routes
-import authRoute from "./routes/auth/user";
-import productRoute from './routes/product/product';
-import wishListRoute from './routes/wishList/wishList';
-import shoppingCartRoute from './routes/cart/cart';
+import authRoute from "./routes/auth/auth.route";
+import productRoute from './routes/product/product.route';
+import wishListRoute from './routes/wishList/wishList.route';
+import shoppingCartRoute from './routes/cart/cart.route';
+import promoCodeRoute from './routes/promoCode/promoCode.route';
+import ordersRoute from './routes/order/order.route';
 // DB 
 import connectToDatabase from './config/connectDB';
 const app: Application = express();
@@ -38,6 +40,8 @@ app.use(`/api/${process.env.API_VERSION}/auth`, authRoute);
 app.use(`/api/${process.env.API_VERSION}/product`, productRoute);
 app.use(`/api/${process.env.API_VERSION}/wishlist`, wishListRoute);
 app.use(`/api/${process.env.API_VERSION}/shopping-cart`, shoppingCartRoute);
+app.use(`/api/${process.env.API_VERSION}/promo-code`, promoCodeRoute);
+app.use(`/api/${process.env.API_VERSION}/orders`, ordersRoute);
 
 
 //  Socket.IO Connection Handling

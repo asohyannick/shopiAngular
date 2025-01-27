@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { Request, Response } from "express";
-import CartModel from "../../models/cart/cart";
-import User from "../../models/user/user.model";
+import CartModel from "../../models/cart/cart.model";
+import Auth from "../../models/auth/auth.model";
 import { io } from "../../index";
 const addProductToCart = async(req:Request, res:Response): Promise<Response> => {
     const {userId, productId, quantity } = req.body;
@@ -78,7 +78,7 @@ const clearCart = async(req:Request, res:Response): Promise<Response> => {
 const { userId } = req.body;
 try {
     // Find the user and clear their cart
-    const user = await User.findById(userId);
+    const user = await Auth.findById(userId);
     if (!user) {
         return res.status(StatusCodes.NOT_FOUND).json({message: "User not found" });
     }

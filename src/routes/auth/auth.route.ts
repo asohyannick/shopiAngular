@@ -12,10 +12,11 @@ import {
     adminLogout,
     requestPasswordReset, 
     setNewAccountPassword,
-} from '../../controllers/auth/user';
+    adminUpdateAccount
+} from '../../controllers/auth/authController';
 import schemaValidator from '../../middleware/schemaValidator/schemaValidator';
 import { 
-    verifyGeneralApplicationAuthenticationToken
+    verifyGeneralApplicationAuthenticationToken,
 } from '../../middleware/auth/auth';
 const router = express.Router();
 router.post(
@@ -76,5 +77,8 @@ router.post(
 router.post(
     '/admin/logout',
     adminLogout // Test this API endpoint before marking it as DONE.
-)
+);
+router.put('/admin/update-account',
+    adminUpdateAccount // Test this API endpoint before marking it as DONE.
+);
 export default router;

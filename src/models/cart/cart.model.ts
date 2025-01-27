@@ -12,7 +12,7 @@ const cartSchema = new mongoose.Schema<Cart>({
     userId:{
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: 'User' // Reference to the user model
+        ref: 'Auth' // Reference to the auth model
     },
     products:[{
         productId:{

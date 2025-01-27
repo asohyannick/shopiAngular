@@ -1,4 +1,4 @@
-import User from "../../models/user/user.model";
+import Auth from "../../models/auth/auth.model";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
@@ -8,13 +8,13 @@ import speakeasy from 'speakeasy';
 const registerAccount = async (req: Request, res: Response) => {
     const { email, password, firstName, lastName } = req.body;
     try {
-        let user = await User.findOne({ email });
+        let user = await Auth.findOne({ email });
         if (user) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "User already exists." });
         }
 
         // Create a new user instance
-        user = new User({ email, password, firstName, lastName }); // Ensure to pass all required fields
+        user = new Auth({ email, password, firstName, lastName }); // Ensure to pass all required fields
         await user.save();
 
         // Create and sign JWT token
@@ -42,7 +42,7 @@ const loginAccount = async (req: Request, res: Response) => {
         const { email, password } = req.body;
 
         // Find user by email
-        const existingUser = await User.findOne({ email });
+        const existingUser = await Auth.findOne({ email });
         if (!existingUser) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid credentials" });
         }
@@ -82,7 +82,7 @@ const loginAccount = async (req: Request, res: Response) => {
 
 const fetchAllAccounts = async (req: Request, res: Response): Promise<Response> => {
     try {
-        const users = await User.find();
+        const users = await Auth.find();
         return res.status(StatusCodes.OK).json({
             message: "Users have been fetched successfully",
             users
@@ -95,7 +95,7 @@ const fetchAllAccounts = async (req: Request, res: Response): Promise<Response> 
 
 const fetchAnAccount = async (req: Request, res: Response): Promise<Response> => {
     try {
-        const user = await User.findById(req.params.id);
+        const user = await Auth.findById(req.params.id);
         if (!user) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
         }
@@ -112,7 +112,7 @@ const fetchAnAccount = async (req: Request, res: Response): Promise<Response> =>
 const updateAccount = async (req: Request, res: Response): Promise<Response> => {
     const { firstName, lastName, email, password } = req.body;
     try {
-        const updatedAccount = await User.findByIdAndUpdate(
+        const updatedAccount = await Auth.findByIdAndUpdate(
             req.params.id,
             { firstName, lastName, email, password },
             { new: true, runValidators: true }
@@ -132,7 +132,7 @@ const updateAccount = async (req: Request, res: Response): Promise<Response> => 
 
 const deleteAccount = async (req: Request, res: Response): Promise<Response> => {
     try {
-        const deletedAccount = await User.findByIdAndDelete(req.params.id);
+        const deletedAccount = await Auth.findByIdAndDelete(req.params.id);
         if (!deletedAccount) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
         }
@@ -167,11 +167,11 @@ const signUpAdmin = async (req: Request, res: Response): Promise<Response> => {
     const { firstName, lastName, email, password } = req.body;   
     try {
         // Check if the admin already exists
-        const existingAdmin = await User.findOne({ email });
+        const existingAdmin = await Auth.findOne({ email });
         if (existingAdmin) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "Admin already exists!" });
         }
-        const newAdmin = new User({
+        const newAdmin = new Auth({
             firstName,
             lastName,
             email,
@@ -206,7 +206,7 @@ const signInAdmin = async(req:Request, res:Response) => {
     const { email, password } = req.body;
     try {
         // Find the admin by email
-        const admin = await User.findOne({ email, isAdmin: true });
+        const admin = await Auth.findOne({ email, isAdmin: true });
 
         if (!admin) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid credentials" });
@@ -257,6 +257,21 @@ const adminLogout = async(req: Request, res: Response): Promise<Response> => {
     }
 }
 
+// Admin update account
+const adminUpdateAccount = async(req:Request, res:Response): Promise<Response> => {
+    const { isAdmin } = req.body;
+    const { id } = req.params;
+ try{
+    const user = await Auth.findByIdAndUpdate(id, {isAdmin}, {new: true});
+    if(!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({message: "Admin not found"});
+    }
+    return res.status(StatusCodes.OK).json({message: "Admin has been updated successfully!", user});
+ } catch(error) {
+    console.error("Error occurred whiling updating admin account:", error);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong." });
+ }
+}
 // Generate 2FA secret and send codes expired." 
 const sendTwoFactorCode = async (user: any) => {
     const secret = speakeasy.generateSecret({ length: 20 });
@@ -310,7 +325,7 @@ const sendPasswordResetEmail = async (email: string, resetLink: string, twoFACod
 const requestPasswordReset = async (req: Request, res: Response): Promise<Response> => {
     const { email } = req.body;
     try {
-        const user = await User.findOne({ email });
+        const user = await Auth.findOne({ email });
         if (!user) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "No user found with that email." });
         }
@@ -344,7 +359,7 @@ const setNewAccountPassword = async (req: Request, res: Response): Promise<Respo
     try {
         // verify the JWT token
         const decoded: any = jwt.verify(token, process.env.JWT_SECRET_KEY as string);
-        const user = await User.findOne({
+        const user = await Auth.findOne({
             _id: decoded.id,
             resetPasswordToken: token,
             resetPasswordExpires: { $gt: Date.now() },
@@ -397,5 +412,6 @@ export {
     signInAdmin,
     adminLogout,
     requestPasswordReset,
-    setNewAccountPassword
+    setNewAccountPassword,
+    adminUpdateAccount
 };
