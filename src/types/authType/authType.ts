@@ -17,4 +17,5 @@ export interface AuthType extends Document {
     wishlist:Types.ObjectId[]; // Reference to the Wishlist
     cart: CartProduct[] ;
     active: boolean;
+    userUpdates:string[];
 }

@@ -20,7 +20,16 @@ import {
     fetchAUser,
     updateAUser,
     deleteAUser,
-    activateUserAccount
+    activateUserAccount,
+    searchUser,
+    updateUsersInBulk,
+    createUserLogActivity,
+    fetchAllUserLogActivities,
+    fetchAllUserLogActivity,
+    updateUserLogActivity,
+    deleteUserLogActivity,
+    adminRequestToResetAUserPassword,
+    adminResetNewUserPassword
 } from 
 "../../controllers/product/productController";
 const router = express.Router();
@@ -166,4 +175,50 @@ router.put('/activate-account/:userId/status',
     verifyAdminExist,
     activateUserAccount
 );
+router.get('/search-user',
+    verifySuperAdminToken,
+    verifyAdminExist,
+    searchUser
+);
+router.post('/create-activity/logs',
+    verifySuperAdminToken,
+    verifyAdminExist,
+    createUserLogActivity
+);
+router.get('/fetch-users/logs',
+    verifySuperAdminToken,
+    verifyAdminExist,
+    fetchAllUserLogActivities
+);
+
+router.get('/fetch-users/log/:id',
+    verifySuperAdminToken,
+    verifyAdminExist,
+    fetchAllUserLogActivity 
+);
+router.put('/update-user/log/:id',
+    verifySuperAdminToken,
+    verifyAdminExist,
+    updateUserLogActivity
+);
+router.delete('/delete-user/log/:id',
+    verifySuperAdminToken,
+    verifyAdminExist,
+    deleteUserLogActivity
+);
+router.put('/bulk-update/users',
+    verifySuperAdminToken,
+    verifyAdminExist,
+    updateUsersInBulk,
+);
+router.post('/request-password-reset',
+    verifySuperAdminToken,
+    verifyAdminExist,
+    adminRequestToResetAUserPassword
+);
+router.post('/reset-password',
+    verifySuperAdminToken,
+    verifyAdminExist,
+    adminResetNewUserPassword
+)
 export default router;
