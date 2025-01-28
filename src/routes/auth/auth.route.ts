@@ -15,11 +15,18 @@ import {
     adminUpdateAccount,
     googleAuth
 } from '../../controllers/auth/authController';
+import { 
+    gitHubRedirect, 
+    githubAuthentication
+} from '../../controllers/auth/githubAuth/githubAuth';
 import schemaValidator from '../../middleware/schemaValidator/schemaValidator';
 import { 
     verifyGeneralApplicationAuthenticationToken,
+    verifyGithubAuthToken
 } from '../../middleware/auth/auth';
 const router = express.Router();
+
+// user routes
 router.post(
     "/register",
     schemaValidator("/auth/register"),
@@ -65,6 +72,8 @@ router.post(
     verifyGeneralApplicationAuthenticationToken,
     userLogout
 );
+
+// admin routes
 router.post(
     "/admin/signup",
     schemaValidator("/auth/admin/signup"),
@@ -82,7 +91,16 @@ router.post(
 router.put('/admin/update-account',
     adminUpdateAccount // Test this API endpoint before marking it as DONE.
 );
+// Third-party Auth route
 router.post('/google/auth',
     googleAuth
+);
+// Github authentication route
+router.get('/auth/github',
+    gitHubRedirect
+);
+router.get('/auth/github/callback',
+    verifyGithubAuthToken,
+    githubAuthentication
 );
 export default router;

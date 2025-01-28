@@ -75,8 +75,23 @@ next: NextFunction) => {
     next();
 };
 
+// check  and validate the token to grant access to the user to login using their github account
+const verifyGithubAuthToken = (req:Request, res:Response, next: NextFunction) => {
+   const token = req.cookies['auth_token'];
+   if (!token) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({message: "Access denied"});
+   }
+   try {
+    const verified = jwt.verify(token, process.env.JWT_SECRET_KEY as string) as CustomJwtPayload;
+    req.user = verified; // Attach user info to the request
+    next();
+ } catch (error) {
+    return res.status(StatusCodes.BAD_REQUEST).json({message: "Invalid token"});
+ }
+} 
 export {
     verifyGeneralApplicationAuthenticationToken,
     verifySuperAdminToken,
     verifyAdminExist,
+    verifyGithubAuthToken
 };

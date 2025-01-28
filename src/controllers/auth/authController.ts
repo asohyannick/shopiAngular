@@ -6,8 +6,9 @@ import { Request, Response } from 'express';
 import nodemailer from 'nodemailer';
 import speakeasy from 'speakeasy';
 import admin from './firebaseAuth/firebaseAdmin'
-import firebase from 'firebase/app';
-import 'firebase/auth';
+import { initializeApp } from "firebase/app";
+import {getAuth} from 'firebase/auth';
+import { UserRecord } from 'firebase-admin/lib/auth/user-record'; // Import UserRecord type
 interface firebaseConfigI {
     apiKey: string;
     authDomain:string;
@@ -26,8 +27,10 @@ const firebaseConfig: firebaseConfigI = {
     appId: process.env.FIREBASE_APP_ID as string
 };
 
-firebase.initializeApp(firebaseConfig);
+const firebaseApp = initializeApp(firebaseConfig);
+getAuth(firebaseApp);
 
+// user account registration
 const registerAccount = async (req: Request, res: Response) => {
     const { email, password, firstName, lastName } = req.body;
     try {
@@ -60,6 +63,7 @@ const registerAccount = async (req: Request, res: Response) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong." });
     }
 };
+// login into user account
 
 const loginAccount = async (req: Request, res: Response) => {
     try {
@@ -103,6 +107,7 @@ const loginAccount = async (req: Request, res: Response) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });
     }
 };
+// fetch all accounts
 
 const fetchAllAccounts = async (req: Request, res: Response): Promise<Response> => {
     try {
@@ -117,6 +122,7 @@ const fetchAllAccounts = async (req: Request, res: Response): Promise<Response> 
     }
 };
 
+// fetch an account
 const fetchAnAccount = async (req: Request, res: Response): Promise<Response> => {
     try {
         const user = await Auth.findById(req.params.id);
@@ -133,6 +139,7 @@ const fetchAnAccount = async (req: Request, res: Response): Promise<Response> =>
     }
 };
 
+// update account
 const updateAccount = async (req: Request, res: Response): Promise<Response> => {
     const { firstName, lastName, email, password } = req.body;
     try {
@@ -154,6 +161,7 @@ const updateAccount = async (req: Request, res: Response): Promise<Response> => 
     }
 };
 
+// delete user account
 const deleteAccount = async (req: Request, res: Response): Promise<Response> => {
     try {
         const deletedAccount = await Auth.findByIdAndDelete(req.params.id);
@@ -170,6 +178,7 @@ const deleteAccount = async (req: Request, res: Response): Promise<Response> => 
     }
 };
 
+// logout user
 const userLogout = async(req: Request, res: Response): Promise<Response> => {
     try {
         // Clear the authentication cookie
@@ -424,18 +433,39 @@ const setNewAccountPassword = async (req: Request, res: Response): Promise<Respo
     }
 };
 
+
+// google authentication with firebase API
 const googleAuth = async(req:Request, res:Response): Promise<Response> => {
 const { idToken } = req.body;
-try {
     // Verify the ID token
+    if (!idToken) {
+        return res.status(StatusCodes.BAD_REQUEST).json({message: "ID token is required"});
+    }
+try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     const uid = decodedToken.uid;
-    return res.status(StatusCodes.OK).json({uid, message: "User has been authenticated successfully"});
+    const userRecord: UserRecord = await admin.auth().getUser(uid);
+    return res.status(StatusCodes.OK).json({
+    uid,
+    email: userRecord.email,
+    displayName: userRecord.displayName || null,
+    message: "User has been authenticated successfully",
+
+});
 } catch (error) {
+    // Handle different error types
+    if (error instanceof Error) {
+        if((error as any).code === 'auth/id-token-expired') {
+            return res.status(StatusCodes.UNAUTHORIZED).json({ message: "ID token has expired." });
+        } else if ((error as any).code === 'auth/argument-error') {
+           return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid ID token." });
+        }
+    }
     console.error('Error occurred while authenticating a user', error);
     return res.status(StatusCodes.UNAUTHORIZED).json({ message:"Unauthorized user" });
+    }
 }
-}
+
 export {
     registerAccount,
     loginAccount,
