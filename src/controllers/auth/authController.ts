@@ -5,6 +5,29 @@ import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 import nodemailer from 'nodemailer';
 import speakeasy from 'speakeasy';
+import admin from './firebaseAuth/firebaseAdmin'
+import firebase from 'firebase/app';
+import 'firebase/auth';
+interface firebaseConfigI {
+    apiKey: string;
+    authDomain:string;
+    projectId: string;
+    storageBucket: string;
+    messagingSenderId: string;
+    appId: string;
+}
+
+const firebaseConfig: firebaseConfigI = {
+    apiKey: process.env.FIREBASE_API_KEY as string,
+    authDomain: process.env.FIREBASE_AUTH_DOMAIN as string,
+    projectId: process.env.FIREBASE_PROJECT_ID as string,
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET as string,
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID as string,
+    appId: process.env.FIREBASE_APP_ID as string
+};
+
+firebase.initializeApp(firebaseConfig);
+
 const registerAccount = async (req: Request, res: Response) => {
     const { email, password, firstName, lastName } = req.body;
     try {
@@ -29,7 +52,8 @@ const registerAccount = async (req: Request, res: Response) => {
 
         // Respond with success message
         return res.status(StatusCodes.CREATED).json({
-            message: "User has been created successfully."
+            message: "User has been created successfully.",
+            user
         });
     } catch (error) {
         console.error("Registration error:", error); // More context in error logs
@@ -400,6 +424,18 @@ const setNewAccountPassword = async (req: Request, res: Response): Promise<Respo
     }
 };
 
+const googleAuth = async(req:Request, res:Response): Promise<Response> => {
+const { idToken } = req.body;
+try {
+    // Verify the ID token
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const uid = decodedToken.uid;
+    return res.status(StatusCodes.OK).json({uid, message: "User has been authenticated successfully"});
+} catch (error) {
+    console.error('Error occurred while authenticating a user', error);
+    return res.status(StatusCodes.UNAUTHORIZED).json({ message:"Unauthorized user" });
+}
+}
 export {
     registerAccount,
     loginAccount,
@@ -413,5 +449,6 @@ export {
     adminLogout,
     requestPasswordReset,
     setNewAccountPassword,
-    adminUpdateAccount
+    adminUpdateAccount,
+    googleAuth
 };

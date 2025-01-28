@@ -12,7 +12,8 @@ import {
     adminLogout,
     requestPasswordReset, 
     setNewAccountPassword,
-    adminUpdateAccount
+    adminUpdateAccount,
+    googleAuth
 } from '../../controllers/auth/authController';
 import schemaValidator from '../../middleware/schemaValidator/schemaValidator';
 import { 
@@ -80,5 +81,8 @@ router.post(
 );
 router.put('/admin/update-account',
     adminUpdateAccount // Test this API endpoint before marking it as DONE.
+);
+router.post('/google/auth',
+    googleAuth
 );
 export default router;

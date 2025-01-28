@@ -1,4 +1,4 @@
-import express, { Application } from "express";
+import express, {Request, Response, Application, NextFunction } from "express";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import { Server } from 'socket.io';
@@ -6,6 +6,9 @@ import http from 'http';
 import 'dotenv/config';
 import helmet from 'helmet';
 import cors from 'cors';
+import csurf from "csurf";
+import limiter from "./middleware/limiter/limiter";
+import { rateLimiterMiddleware } from "./middleware/limiter/rateLimiter";
 // routes
 import authRoute from "./routes/auth/auth.route";
 import productRoute from './routes/product/product.route';
@@ -13,10 +16,14 @@ import wishListRoute from './routes/wishList/wishList.route';
 import shoppingCartRoute from './routes/cart/cart.route';
 import promoCodeRoute from './routes/promoCode/promoCode.route';
 import ordersRoute from './routes/order/order.route';
+import salesRoute from './routes/sales/sales.route';
+import customerRoute from './routes/customer/customer.route';
 // DB 
 import connectToDatabase from './config/connectDB';
+import { StatusCodes } from "http-status-codes";
 const app: Application = express();
 const port: number | string = process.env.APP_PORT || 8000;
+const csrfProtection = csurf({cookie: true});// Enable cookie based CSRF protection
 // Create HTTP server
 const server = http.createServer(app);
 // Initialize Socket.IO
@@ -25,15 +32,33 @@ const io = new Server(server);
 // Middleware Registration
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+app.use(cookieParser()); // Cookie parser middleware to parse cookie
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
   console.log('Morgan enabled...');
 }
 
+// Middleware to create and send CSRF token
+app.use((req: Request, res: Response, next: NextFunction) => {
+    res.cookie('XSRF-TOKEN', req.csrfToken()); // Set CSRF token in a cookie
+    next();
+});
+
+// Middleware to handle CSRF token errors
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    if (err.code === 'EBADCSRF') {
+        return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid CSRF token." });
+        // Fixed missing parenthesis
+    }
+    next(err);
+});
+
 // Security Registration
 app.use(helmet());
 app.use(cors());
+app.use(limiter); // Limit the number of requests users can sent  to my  API endpoints.
+app.use(csrfProtection); 
+app.use(rateLimiterMiddleware); // This limits a user to make only 10 requests per second.
 
 // Routes Registration
 app.use(`/api/${process.env.API_VERSION}/auth`, authRoute);
@@ -42,6 +67,8 @@ app.use(`/api/${process.env.API_VERSION}/wishlist`, wishListRoute);
 app.use(`/api/${process.env.API_VERSION}/shopping-cart`, shoppingCartRoute);
 app.use(`/api/${process.env.API_VERSION}/promo-code`, promoCodeRoute);
 app.use(`/api/${process.env.API_VERSION}/orders`, ordersRoute);
+app.use(`/api/${process.env.API_VERSION}/sales`, salesRoute);
+app.use(`/api/${process.env.API_VERSION}/customer`, customerRoute);
 
 
 //  Socket.IO Connection Handling
