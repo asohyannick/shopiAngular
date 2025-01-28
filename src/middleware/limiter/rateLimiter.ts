@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { StatusCodes } from 'http-status-codes';
 import { RateLimiterMemory } from 'rate-limiter-flexible';
 
 // Configure rate limiter with in-memory store
@@ -17,16 +18,12 @@ const rateLimiterMiddleware = (req: Request, res: Response, next: NextFunction):
                 next(); // Call next() if the request is within the rate limit
             })
             .catch(() => {
-                res.status(429).send('Too Many Requests'); // Send 429 status if limit exceeded
+               return res.status(StatusCodes.TOO_MANY_REQUESTS).send('Too Many Requests'); // Send 429 status if limit exceeded
             });
     } else {
-        res.status(400).send('Bad Request: IP address not found'); // Handle the case where IP
+       res.status(StatusCodes.BAD_REQUEST).send('Bad Request: IP address not found'); // Handle the case where IP is not found
     }
 };
 
 // Export the middleware function
 export { rateLimiterMiddleware };
-
-
-
-

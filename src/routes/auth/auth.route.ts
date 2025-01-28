@@ -19,10 +19,11 @@ import {
     gitHubRedirect, 
     githubAuthentication
 } from '../../controllers/auth/githubAuth/githubAuth';
+import { faceBookRedirect, faceBookAuthentication } from '../../controllers/auth/facebookAuth/facebookAuth';
 import schemaValidator from '../../middleware/schemaValidator/schemaValidator';
 import { 
     verifyGeneralApplicationAuthenticationToken,
-    verifyGithubAuthToken
+    verifyThirdPartyAuthToken
 } from '../../middleware/auth/auth';
 const router = express.Router();
 
@@ -92,6 +93,8 @@ router.put('/admin/update-account',
     adminUpdateAccount // Test this API endpoint before marking it as DONE.
 );
 // Third-party Auth route
+
+// Google auth with firebase APIs
 router.post('/google/auth',
     googleAuth
 );
@@ -100,7 +103,15 @@ router.get('/auth/github',
     gitHubRedirect
 );
 router.get('/auth/github/callback',
-    verifyGithubAuthToken,
+    verifyThirdPartyAuthToken,
     githubAuthentication
 );
+// Facebook authentication route
+router.get('/auth/facebook',
+    faceBookRedirect
+);
+router.get('/auth/facebook/callback',
+    verifyThirdPartyAuthToken,
+    faceBookAuthentication
+)
 export default router;
