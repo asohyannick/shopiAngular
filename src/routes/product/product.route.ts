@@ -1,4 +1,4 @@
-import  express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { 
     verifyAdminExist, 
     verifySuperAdminToken,
@@ -10,215 +10,232 @@ import {
     fetchProduct, 
     updateProduct, 
     deleteProduct, 
-    searchProducts ,
+    searchProducts,
     createReview, 
     fetchAllReviews,
     fetchReview,
     updateReview,
     deleteReview,
-    fetchAllUsers,
-    fetchAUser,
-    updateAUser,
-    deleteAUser,
-    activateUserAccount,
-    searchUser,
-    updateUsersInBulk,
-    createUserLogActivity,
-    fetchAllUserLogActivities,
-    fetchAllUserLogActivity,
-    updateUserLogActivity,
-    deleteUserLogActivity,
-    adminRequestToResetAUserPassword,
-    adminResetNewUserPassword
-} from 
-"../../controllers/product/productController";
+} from "../../controllers/product/productController";
+
 const router = express.Router();
 
+/**
+ * @swagger
+ * /api/v1/product/create-product:
+ *   post:
+ *     summary: Admin should be able to create a product if he is authenticated
+ *     responses:
+ *       201:
+ *         description: Admin should be able to create a product if he is authenticated
+ *       400:
+ *         description: Bad request
+ */
 router.post('/create-product',
-    verifySuperAdminToken, // Verify the admin token first
-    verifyAdminExist, // Then check if the current user is an admin
+    verifySuperAdminToken,
+    verifyAdminExist,
     createProduct
 );
 
+/**
+ * @swagger
+ * /api/v1/product/fetch-all-products:
+ *   get:
+ *     summary: Admin should be able to fetch all products if he is authenticated
+ *     responses:
+ *       200:
+ *         description: Admin should be able to fetch all products if he is authenticated
+ *       400:
+ *         description: Bad request
+ */
 router.get('/fetch-all-products', 
-    verifySuperAdminToken, // Verify the admin token first
-    verifyAdminExist, // Then check if the current user is an admin
+    verifySuperAdminToken,
+    verifyAdminExist,
     fetchAllProducts
 );
 
-
+/**
+ * @swagger
+ * /api/v1/product/fetch-product/{id}:
+ *   get:
+ *     summary: Admin should be able to fetch a product if he is authenticated
+ *     responses:
+ *       200:
+ *         description: Admin should be able to fetch a product if he is authenticated
+ *       400:
+ *         description: Bad request
+ */
 router.get('/fetch-product/:id', 
-    verifySuperAdminToken,  // Verify the admin token first
-    verifyAdminExist,  // Then check if the current user is an admin
+    verifySuperAdminToken,
+    verifyAdminExist,
     fetchProduct
 );
 
-
+/**
+ * @swagger
+ * /api/v1/product/update-product/{id}:
+ *   put:
+ *     summary: Admin should be able to update a product if he is authenticated
+ *     responses:
+ *       200:
+ *         description: Admin should be able to update a product if he is authenticated
+ *       400:
+ *         description: Bad request
+ */
 router.put('/update-product/:id', 
-    verifySuperAdminToken,  // Verify the admin token first
-    verifyAdminExist,  // Then check if the current user is an admin
+    verifySuperAdminToken,
+    verifyAdminExist,
     updateProduct
 );
 
-
+/**
+ * @swagger
+ * /api/v1/product/delete-product/{id}:
+ *   delete:
+ *     summary: Admin should be able to delete a product if he is authenticated
+ *     responses:
+ *       200:
+ *         description: Admin should be able to delete a product if he is authenticated
+ *       400:
+ *         description: Bad request
+ */
 router.delete('/delete-product/:id', 
-    verifySuperAdminToken,  // Verify the admin token first
-    verifyAdminExist,  // Then check if the current user is an admin
+    verifySuperAdminToken,
+    verifyAdminExist,
     deleteProduct
 );
 
+/**
+ * @swagger
+ * /api/v1/product/search-products:
+ *   get:
+ *     summary: Admin and normal users should be able to search, filter, and paginate across all products if authenticated
+ *     responses:
+ *       200:
+ *         description: Admin and normal users should be able to search, filter, and paginate across all products if authenticated
+ *       400:
+ *         description: Bad request
+ */
 router.get('/search-products',
-    verifyGeneralApplicationAuthenticationToken,  // Check if user is authenticated 
-    (req:Request, res:Response, next:NextFunction) => {
-     if (req.user  && req.user.isAdmin) {
-        // If the user is and admin, skip the next two middleware
-        return next();
-     }
-     // If not an admin, continue to check for other conditions 
-     return verifySuperAdminToken(req, res, next);
+    verifyGeneralApplicationAuthenticationToken,
+    (req: Request, res: Response, next: NextFunction) => {
+        if (req.user && req.user.isAdmin) {
+            return next();
+        }
+        return verifySuperAdminToken(req, res, next);
     }, 
     verifyAdminExist,
     searchProducts
 );
 
+/**
+ * @swagger
+ * /api/v1/product/{productId}/create-reviews:
+ *   post:
+ *     summary: Both admin and normal users should be able to create reviews if they are authenticated
+ *     responses:
+ *       201:
+ *         description: Both admin and normal users should be able to create reviews if they are authenticated
+ *       400:
+ *         description: Bad request
+ */
 router.post("/:productId/create-reviews", 
-    verifyGeneralApplicationAuthenticationToken, // Check if user is authenticated
-    (req:Request, res:Response, next:NextFunction) => {
-    if (req.user  && req.user.isAdmin) {
-     // If the user is and admin, skip the next two middleware
-     return next();
-    }
-  // If not an admin, continue to check for other conditions 
-  return verifySuperAdminToken(req, res, next);
- }, 
+    verifyGeneralApplicationAuthenticationToken,
+    (req: Request, res: Response, next: NextFunction) => {
+        if (req.user && req.user.isAdmin) {
+            return next();
+        }
+        return verifySuperAdminToken(req, res, next);
+    }, 
     createReview
 );
 
+/**
+ * @swagger
+ * /api/v1/product/{productId}/fetch-reviews:
+ *   get:
+ *     summary: Both admin and normal users should be able to fetch product reviews if they are authenticated
+ *     responses:
+ *       200:
+ *         description: Both admin and normal users should be able to fetch product reviews if they are authenticated
+ *       400:
+ *         description: Bad request
+ */
 router.get("/:productId/fetch-reviews", 
-    verifyGeneralApplicationAuthenticationToken, // Check if user is authenticated
-    (req:Request, res:Response, next:NextFunction) => {
-    if (req.user  && req.user.isAdmin) {
-     // If the user is and admin, skip the next two middleware
-     return next();
-    }
-  // If not an admin, continue to check for other conditions 
-  return verifySuperAdminToken(req, res, next);
- }, 
+    verifyGeneralApplicationAuthenticationToken,
+    (req: Request, res: Response, next: NextFunction) => {
+        if (req.user && req.user.isAdmin) {
+            return next();
+        }
+        return verifySuperAdminToken(req, res, next);
+    }, 
     fetchAllReviews
 );
 
+/**
+ * @swagger
+ * /api/v1/product/{productId}/fetch-review/{reviewId}:
+ *   get:
+ *     summary: Both admin and normal users should be able to fetch a product review if they are authenticated
+ *     responses:
+ *       200:
+ *         description: Both admin and normal users should be able to fetch a product review if they are authenticated
+ *       400:
+ *         description: Bad request
+ */
 router.get("/:productId/fetch-review/:reviewId", 
-    verifyGeneralApplicationAuthenticationToken, // Check if user is authenticated
-    (req:Request, res:Response, next:NextFunction) => {
-    if (req.user  && req.user.isAdmin) {
-     // If the user is and admin, skip the next two middleware
-     return next();
-    }
-  // If not an admin, continue to check for other conditions 
-  return verifySuperAdminToken(req, res, next);
- }, 
+    verifyGeneralApplicationAuthenticationToken,
+    (req: Request, res: Response, next: NextFunction) => {
+        if (req.user && req.user.isAdmin) {
+            return next();
+        }
+        return verifySuperAdminToken(req, res, next);
+    }, 
     fetchReview
 );
 
+/**
+ * @swagger
+ * /api/v1/product/{productId}/update-review/{reviewId}:
+ *   put:
+ *     summary: Both admin and normal users should be able to update a product review if they are authenticated
+ *     responses:
+ *       200:
+ *         description: Both admin and normal users should be able to update a product review if they are authenticated
+ *       400:
+ *         description: Bad request
+ */
 router.put("/:productId/update-review/:reviewId", 
-    verifyGeneralApplicationAuthenticationToken, // Check if user is authenticated
-    (req:Request, res:Response, next:NextFunction) => {
-    if (req.user  && req.user.isAdmin) {
-     // If the user is and admin, skip the next two middleware
-     return next();
-    }
-  // If not an admin, continue to check for other conditions 
-  return verifySuperAdminToken(req, res, next);
- }, 
+    verifyGeneralApplicationAuthenticationToken,
+    (req: Request, res: Response, next: NextFunction) => {
+        if (req.user && req.user.isAdmin) {
+            return next();
+        }
+        return verifySuperAdminToken(req, res, next);
+    }, 
     updateReview
 );
 
+/**
+ * @swagger
+ * /api/v1/product/{productId}/delete-review/{reviewId}:
+ *   delete:
+ *     summary: Both admin and normal users should be able to delete a product review if they are authenticated
+ *     responses:
+ *       200:
+ *         description: Both admin and normal users should be able to delete a product review if they are authenticated
+ *       400:
+ *         description: Bad request
+ */
 router.delete("/:productId/delete-review/:reviewId", 
-    verifyGeneralApplicationAuthenticationToken, // Check if user is authenticated
-    (req:Request, res:Response, next:NextFunction) => {
-    if (req.user  && req.user.isAdmin) {
-     // If the user is and admin, skip the next two middleware
-     return next();
-    }
-  // If not an admin, continue to check for other conditions 
-  return verifySuperAdminToken(req, res, next);
- }, 
+    verifyGeneralApplicationAuthenticationToken,
+    (req: Request, res: Response, next: NextFunction) => {
+        if (req.user && req.user.isAdmin) {
+            return next();
+        }
+        return verifySuperAdminToken(req, res, next);
+    }, 
     deleteReview
 );
 
-router.get('/all-users',
-    verifySuperAdminToken,
-    verifyAdminExist,
-    fetchAllUsers
-);
-
-router.get('/users/:id',
-    verifySuperAdminToken,
-    verifyAdminExist,
-    fetchAUser
-);
-
-router.put('/update-users/:id',
-    verifySuperAdminToken,
-    verifyAdminExist,
-    updateAUser
-);
-
-router.delete('/delete-users/:id',
-    verifySuperAdminToken,
-    verifyAdminExist,
-    deleteAUser
-);
-
-router.put('/activate-account/:userId/status',
-    verifySuperAdminToken,
-    verifyAdminExist,
-    activateUserAccount
-);
-router.get('/search-user',
-    verifySuperAdminToken,
-    verifyAdminExist,
-    searchUser
-);
-router.post('/create-activity/logs',
-    verifySuperAdminToken,
-    verifyAdminExist,
-    createUserLogActivity
-);
-router.get('/fetch-users/logs',
-    verifySuperAdminToken,
-    verifyAdminExist,
-    fetchAllUserLogActivities
-);
-
-router.get('/fetch-users/log/:id',
-    verifySuperAdminToken,
-    verifyAdminExist,
-    fetchAllUserLogActivity 
-);
-router.put('/update-user/log/:id',
-    verifySuperAdminToken,
-    verifyAdminExist,
-    updateUserLogActivity
-);
-router.delete('/delete-user/log/:id',
-    verifySuperAdminToken,
-    verifyAdminExist,
-    deleteUserLogActivity
-);
-router.put('/bulk-update/users',
-    verifySuperAdminToken,
-    verifyAdminExist,
-    updateUsersInBulk,
-);
-router.post('/request-password-reset',
-    verifySuperAdminToken,
-    verifyAdminExist,
-    adminRequestToResetAUserPassword
-);
-router.post('/reset-password',
-    verifySuperAdminToken,
-    verifyAdminExist,
-    adminResetNewUserPassword
-)
 export default router;

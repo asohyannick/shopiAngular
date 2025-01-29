@@ -34,5 +34,5 @@ export default {
     "/auth/register": authRegister,
     "/auth/login": authLogin,
     "/auth/admin/signup": adminSignUp,
-    "auth/admin/signin": adminLogin 
+    "/auth/admin/signin": adminLogin 
 } as { [key: string]: ObjectSchema }

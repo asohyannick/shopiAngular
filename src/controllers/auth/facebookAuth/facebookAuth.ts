@@ -12,7 +12,7 @@ const faceBookRedirect = (req:Request, res:Response) => {
 const faceBookAuthentication = async(req:Request, res:Response): Promise<Response> => {
  const { code } = req.query;
     if (!code || Array.isArray(code)) {
-        return res.status(StatusCodes.BAD_REQUEST).json({message: "Token ID is required"});
+        return res.status(StatusCodes.BAD_REQUEST).json({ message: "Token ID is required" });
     }
     try {
         const tokenResponse = await axios.get(`https://graph.facebook.com/v12.0/oauth/access_token`, {
@@ -52,14 +52,11 @@ const faceBookAuthentication = async(req:Request, res:Response): Promise<Respons
             jwt: token, user
         }); // Or redirect to a front-end route
     } catch (error) {
-        if (error instanceof Error) {
-            if ((error as any).code === 'auth/id-token-expired') {
-                return res.status(StatusCodes.UNAUTHORIZED).json({ message: "ID token has expired." });
-            }else if ((error as any).code === 'auth/argument-error') {
-                return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid ID token." });
-            }
+        // Check for specific axios errors
+        if (axios.isAxiosError(error)) {
+            return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.response?.data || 'Something went wrong' });
         }
-        console.error('Error during Facebook authentication', error);
+
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Something went wrong' });
     }
 }
