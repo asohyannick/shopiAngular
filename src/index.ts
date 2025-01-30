@@ -4,6 +4,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import csurf from "csurf";
 import { Server } from 'socket.io';
+import { SetSocketIO } from "./controllers/chat/chatController";
 import http from 'http';
 import { setupSwagger } from "./utils/swagger/swagger";
 import 'dotenv/config';
@@ -22,6 +23,8 @@ import orderRoute from './routes/order/order.route';
 import salesRoute from './routes/sales/sales.route';
 import customerRoute from './routes/customer/customer.route';
 import stockRoute from './routes/stock/stock.route';
+import notificationManagerRoute from './routes/notificationManager/notificationManager.route'  
+import chatRoute from './routes/chat/chat.route'
 // DB 
 import connectToDatabase from './config/connectDB';
 const app: Application = express();
@@ -31,7 +34,7 @@ const csrfProtection = csurf({cookie: true});// Enable cookie based CSRF protect
 const server = http.createServer(app);
 // Initialize Socket.IO
 const io = new Server(server);
-
+SetSocketIO(io);
 // Middleware Registration
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -70,6 +73,7 @@ app.use(rateLimiterMiddleware); // This limits a user to make only 10 requests p
 app.use(`/api/${process.env.API_VERSION}/auth`, authRoute);
 app.use(`/api/${process.env.API_VERSION}/user`, userRoute);
 app.use(`/api/${process.env.API_VERSION}/product`, productRoute);
+app.use(`/api/${process.env.API_VERSION}/notify`, notificationManagerRoute);
 app.use(`/api/${process.env.API_VERSION}/stock`, stockRoute);
 app.use(`/api/${process.env.API_VERSION}/wishlist`, wishListRoute);
 app.use(`/api/${process.env.API_VERSION}/shopping-cart`, shoppingCartRoute);
@@ -77,6 +81,7 @@ app.use(`/api/${process.env.API_VERSION}/promo-code`, promoCodeRoute);
 app.use(`/api/${process.env.API_VERSION}/order`, orderRoute);
 app.use(`/api/${process.env.API_VERSION}/sales`, salesRoute);
 app.use(`/api/${process.env.API_VERSION}/customer`, customerRoute);
+app.use(`/api/${process.env.API_VERSION}/chat`, chatRoute);
 
 //  Socket.IO Connection Handling
 io.on('connection', (socket) => {

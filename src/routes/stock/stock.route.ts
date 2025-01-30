@@ -18,12 +18,16 @@ const router = express.Router();
  * @swagger
  * /api/v1/stock/create-stock:
  *   post:
- *     summary: Admin should be able to create a stock if authenticated
+ *     summary: Create a new stock (Admin only)
  *     responses:
  *       201:
- *         description: Admin should be able to create a stock if authenticated
+ *         description: Stock created successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to create stock.
  */
 router.post('/create-stock',
     verifySuperAdminToken,
@@ -35,12 +39,14 @@ router.post('/create-stock',
  * @swagger
  * /api/v1/stock/fetch-stocks:
  *   get:
- *     summary: Admin should be able to fetch all stocks if authenticated
+ *     summary: Fetch all stocks (Admin only)
  *     responses:
  *       200:
- *         description: Admin should be able to fetch all stocks if authenticated
- *       400:
- *         description: Bad request
+ *         description: Stocks fetched successfully.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch stocks.
  */
 router.get('/fetch-stocks',
     verifySuperAdminToken,
@@ -52,12 +58,23 @@ router.get('/fetch-stocks',
  * @swagger
  * /api/v1/stock/fetch-stock/{id}:
  *   get:
- *     summary: Admin should be able to fetch a stock if authenticated
+ *     summary: Fetch a specific stock by ID (Admin only)
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the stock to fetch.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: Admin should be able to fetch a stock if authenticated
- *       400:
- *         description: Bad request
+ *         description: Stock fetched successfully.
+ *       404:
+ *         description: Stock not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch stock.
  */
 router.get('/fetch-stock/:id',
     verifySuperAdminToken,
@@ -69,12 +86,25 @@ router.get('/fetch-stock/:id',
  * @swagger
  * /api/v1/stock/update-stock/{id}:
  *   put:
- *     summary: Admin should be able to update a stock if authenticated
+ *     summary: Update a specific stock by ID (Admin only)
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the stock to update.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: Admin should be able to update a stock if authenticated
+ *         description: Stock updated successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       404:
+ *         description: Stock not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to update stock.
  */
 router.put('/update-stock/:id',
     verifySuperAdminToken,
@@ -86,12 +116,23 @@ router.put('/update-stock/:id',
  * @swagger
  * /api/v1/stock/remove-stock/{id}:
  *   delete:
- *     summary: Admin should be able to delete a stock if authenticated
+ *     summary: Delete a specific stock by ID (Admin only)
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the stock to delete.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: Admin should be able to delete a stock if authenticated
- *       400:
- *         description: Bad request
+ *         description: Stock deleted successfully.
+ *       404:
+ *         description: Stock not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to delete stock.
  */
 router.delete('/remove-stock/:id',
     verifySuperAdminToken,
@@ -103,12 +144,23 @@ router.delete('/remove-stock/:id',
  * @swagger
  * /api/v1/stock/product/{productId}:
  *   get:
- *     summary: Admin should be able to fetch a stock by product if authenticated
+ *     summary: Fetch stock by product ID (Admin only)
+ *     parameters:
+ *       - name: productId
+ *         in: path
+ *         required: true
+ *         description: ID of the product to fetch stock for.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: Admin should be able to fetch a stock by product if authenticated
- *       400:
- *         description: Bad request
+ *         description: Stock fetched successfully for the specified product.
+ *       404:
+ *         description: Product not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch stock.
  */
 router.get('/product/:productId',
     verifySuperAdminToken,
@@ -120,12 +172,23 @@ router.get('/product/:productId',
  * @swagger
  * /api/v1/stock/history/{stockId}:
  *   get:
- *     summary: Admin should be able to fetch stock history if authenticated
+ *     summary: Fetch stock history by stock ID (Admin only)
+ *     parameters:
+ *       - name: stockId
+ *         in: path
+ *         required: true
+ *         description: ID of the stock to fetch history for.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: Admin should be able to fetch stock history if authenticated
- *       400:
- *         description: Bad request
+ *         description: Stock history fetched successfully.
+ *       404:
+ *         description: Stock not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch stock history.
  */
 router.get('/history/:stockId',
     verifySuperAdminToken,
@@ -137,12 +200,14 @@ router.get('/history/:stockId',
  * @swagger
  * /api/v1/stock/reorder:
  *   get:
- *     summary: Admin should be able to reorder stocks if authenticated
+ *     summary: Reorder stocks (Admin only)
  *     responses:
  *       200:
- *         description: Admin should be able to reorder stocks if authenticated
- *       400:
- *         description: Bad request
+ *         description: Stocks reordered successfully.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to reorder stocks.
  */
 router.get('/reorder',
     verifySuperAdminToken,
@@ -154,17 +219,18 @@ router.get('/reorder',
  * @swagger
  * /api/v1/stock/status:
  *   get:
- *     summary: Admin should be able to check stock status if authenticated
+ *     summary: Check stock status (Admin only)
  *     responses:
  *       200:
- *         description: Admin should be able to check stock status if authenticated
- *       400:
- *         description: Bad request
+ *         description: Stock status fetched successfully.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to check stock status.
  */
 router.get('/status',
     verifySuperAdminToken,
     verifyAdminExist,
     checkStockStatus
 );
-
 export default router;

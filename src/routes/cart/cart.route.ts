@@ -8,17 +8,20 @@ import {
 } from '../../controllers/shoppingCart/shoppingCartController';
 
 const router = express.Router();
-
 /**
  * @swagger
  * /api/v1/shopping-cart/add-cart:
  *   post:
- *     summary: A user should be able to add a product to his or her shopping cart in our database if authenticated
+ *     summary: Add a product to the shopping cart (User must be authenticated)
  *     responses:
  *       201:
- *         description: A user should be able to add a product to his or her shopping cart in our database if authenticated
+ *         description: Product added to the shopping cart successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to add product to cart.
  */
 router.post('/add-cart',
     verifyGeneralApplicationAuthenticationToken,
@@ -29,12 +32,16 @@ router.post('/add-cart',
  * @swagger
  * /api/v1/shopping-cart/update-cart:
  *   put:
- *     summary: A user should be able to update a product in his or her shopping cart in our database if authenticated
+ *     summary: Update a product in the shopping cart (User must be authenticated)
  *     responses:
  *       200:
- *         description: A user should be able to update a product in his or her shopping cart in our database if authenticated
+ *         description: Product updated in the shopping cart successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to update product in cart.
  */
 router.put('/update-cart',
     verifyGeneralApplicationAuthenticationToken,
@@ -45,12 +52,16 @@ router.put('/update-cart',
  * @swagger
  * /api/v1/shopping-cart/remove-cart-item:
  *   delete:
- *     summary: A user should be able to remove a product from his or her shopping cart in our database if authenticated
+ *     summary: Remove a product from the shopping cart (User must be authenticated)
  *     responses:
  *       200:
- *         description: A user should be able to remove a product from his or her shopping cart in our database if authenticated
+ *         description: Product removed from the shopping cart successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to remove product from cart.
  */
 router.delete('/remove-cart-item',
     verifyGeneralApplicationAuthenticationToken,
@@ -61,23 +72,28 @@ router.delete('/remove-cart-item',
  * @swagger
  * /api/v1/shopping-cart/clear-cart/{userId}:
  *   delete:
- *     summary: A user should be able to clear products from his or her shopping cart in our database if authenticated
+ *     summary: Clear all products from the shopping cart (User must be authenticated)
  *     parameters:
  *       - name: userId
  *         in: path
  *         required: true
- *         description: ID of the user whose cart should be cleared
+ *         description: ID of the user whose cart should be cleared.
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: A user should be able to clear products from his or her shopping cart in our database if authenticated
+ *         description: Shopping cart cleared successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       404:
+ *         description: User not found. Please check the user ID.
+ *       500:
+ *         description: Internal server error. Unable to clear cart.
  */
 router.delete('/clear-cart/:userId',
     verifyGeneralApplicationAuthenticationToken,
     clearCart
 );
-
 export default router;

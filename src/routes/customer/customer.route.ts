@@ -10,17 +10,20 @@ import {
 } from "../../controllers/customer/customerController";
 
 const router = express.Router();
-
 /**
  * @swagger
  * /api/v1/customer/create-customer:
  *   post:
- *     summary: An admin should be able to create a customer account for his or her customer from our API if authenticated
+ *     summary: Create a customer account (Admin must be authenticated)
  *     responses:
  *       201:
- *         description: An admin should be able to create a customer account from our API if authenticated
+ *         description: Customer account created successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to create customer account.
  */
 router.post('/create-customer',
     verifySuperAdminToken,
@@ -32,12 +35,16 @@ router.post('/create-customer',
  * @swagger
  * /api/v1/customer/customer-login:
  *   post:
- *     summary: An admin should be able to login a customer into his or her account from our API if authenticated
+ *     summary: Login a customer into their account (Admin must be authenticated)
  *     responses:
- *       201:
- *         description: An admin should be able to login a customer into his or her account from our API if authenticated
+ *       200:
+ *         description: Customer logged in successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to login customer.
  */
 router.post('/customer-login',
     verifySuperAdminToken,
@@ -49,12 +56,14 @@ router.post('/customer-login',
  * @swagger
  * /api/v1/customer/fetch-customers:
  *   get:
- *     summary: An admin should be able to fetch all customers from our API if authenticated
+ *     summary: Fetch all customers (Admin must be authenticated)
  *     responses:
  *       200:
- *         description: An admin should be able to fetch all customers from our API if authenticated
- *       400:
- *         description: Bad request
+ *         description: Customers fetched successfully.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch customers.
  */
 router.get('/fetch-customers',
     verifySuperAdminToken,
@@ -66,19 +75,23 @@ router.get('/fetch-customers',
  * @swagger
  * /api/v1/customer/fetch-customer/{id}:
  *   get:
- *     summary: An admin should be able to fetch a customer from our API if authenticated
+ *     summary: Fetch a specific customer (Admin must be authenticated)
  *     parameters:
  *       - name: id
  *         in: path
  *         required: true
- *         description: ID of the customer to fetch
+ *         description: ID of the customer to fetch.
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: An admin should be able to fetch a customer from our API if authenticated
- *       400:
- *         description: Bad request
+ *         description: Customer fetched successfully.
+ *       404:
+ *         description: Customer not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch customer.
  */
 router.get('/fetch-customer/:id',
     verifySuperAdminToken,
@@ -90,19 +103,25 @@ router.get('/fetch-customer/:id',
  * @swagger
  * /api/v1/customer/update-customer/{id}:
  *   put:
- *     summary: An admin should be able to update a customer from our API if authenticated
+ *     summary: Update a specific customer (Admin must be authenticated)
  *     parameters:
  *       - name: id
  *         in: path
  *         required: true
- *         description: ID of the customer to update
+ *         description: ID of the customer to update.
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: An admin should be able to update a customer from our API if authenticated
+ *         description: Customer updated successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       404:
+ *         description: Customer not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to update customer.
  */
 router.put('/update-customer/:id',
     verifySuperAdminToken,
@@ -114,24 +133,27 @@ router.put('/update-customer/:id',
  * @swagger
  * /api/v1/customer/remove-customer/{id}:
  *   delete:
- *     summary: An admin should be able to delete a customer from our API if authenticated
+ *     summary: Delete a specific customer (Admin must be authenticated)
  *     parameters:
  *       - name: id
  *         in: path
  *         required: true
- *         description: ID of the customer to delete
+ *         description: ID of the customer to delete.
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: An admin should be able to delete a customer from our API if authenticated
- *       400:
- *         description: Bad request
+ *         description: Customer deleted successfully.
+ *       404:
+ *         description: Customer not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to delete customer.
  */
 router.delete('/remove-customer/:id',
     verifySuperAdminToken,
     verifyAdminExist,
     deleteCustomer
 );
-
 export default router;

@@ -11,17 +11,20 @@ import {
 import { verifyGeneralApplicationAuthenticationToken } from '../../middleware/auth/auth';
 
 const router = express.Router();
-
 /**
  * @swagger
  * /api/v1/wishlist/create-wishlist:
  *   post:
- *     summary: A user should be able to create a wishlist in our database if authenticated
+ *     summary: Create a new wishlist (User must be authenticated)
  *     responses:
  *       201:
- *         description: A user should be able to create a wishlist in our database if authenticated
+ *         description: Wishlist created successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to create wishlist.
  */
 router.post('/create-wishlist', 
     verifyGeneralApplicationAuthenticationToken,
@@ -32,12 +35,14 @@ router.post('/create-wishlist',
  * @swagger
  * /api/v1/wishlist/fetch-wishlists:
  *   get:
- *     summary: A user should be able to fetch all wishlists in our database if authenticated
+ *     summary: Fetch all wishlists for the authenticated user
  *     responses:
  *       200:
- *         description: A user should be able to fetch all wishlists in our database if authenticated
- *       400:
- *         description: Bad request
+ *         description: Wishlists fetched successfully.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch wishlists.
  */
 router.get('/fetch-wishlists', 
     verifyGeneralApplicationAuthenticationToken,
@@ -48,12 +53,23 @@ router.get('/fetch-wishlists',
  * @swagger
  * /api/v1/wishlist/fetch-wishlist/{wishlistId}:
  *   get:
- *     summary: A user should be able to fetch a wishlist in our database if authenticated
+ *     summary: Fetch a specific wishlist by ID (User must be authenticated)
+ *     parameters:
+ *       - name: wishlistId
+ *         in: path
+ *         required: true
+ *         description: ID of the wishlist to fetch.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: A user should be able to fetch a wishlist in our database if authenticated
- *       400:
- *         description: Bad request
+ *         description: Wishlist fetched successfully.
+ *       404:
+ *         description: Wishlist not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch wishlist.
  */
 router.get('/fetch-wishlist/:wishlistId', 
     verifyGeneralApplicationAuthenticationToken,
@@ -64,12 +80,25 @@ router.get('/fetch-wishlist/:wishlistId',
  * @swagger
  * /api/v1/wishlist/update-wishlist/{wishlistId}:
  *   put:
- *     summary: A user should be able to update a wishlist in our database if authenticated
+ *     summary: Update a specific wishlist by ID (User must be authenticated)
+ *     parameters:
+ *       - name: wishlistId
+ *         in: path
+ *         required: true
+ *         description: ID of the wishlist to update.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: A user should be able to update a wishlist in our database if authenticated
+ *         description: Wishlist updated successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       404:
+ *         description: Wishlist not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to update wishlist.
  */
 router.put('/update-wishlist/:wishlistId', 
     verifyGeneralApplicationAuthenticationToken,
@@ -80,12 +109,23 @@ router.put('/update-wishlist/:wishlistId',
  * @swagger
  * /api/v1/wishlist/delete-wishlist/{wishlistId}:
  *   delete:
- *     summary: A user should be able to delete a wishlist in our database if authenticated
+ *     summary: Delete a specific wishlist by ID (User must be authenticated)
+ *     parameters:
+ *       - name: wishlistId
+ *         in: path
+ *         required: true
+ *         description: ID of the wishlist to delete.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: A user should be able to delete a wishlist in our database if authenticated
- *       400:
- *         description: Bad request
+ *         description: Wishlist deleted successfully.
+ *       404:
+ *         description: Wishlist not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to delete wishlist.
  */
 router.delete('/delete-wishlist/:wishlistId',
     verifyGeneralApplicationAuthenticationToken,
@@ -96,12 +136,16 @@ router.delete('/delete-wishlist/:wishlistId',
  * @swagger
  * /api/v1/wishlist/share-wishlist:
  *   post:
- *     summary: A user should be able to share a wishlist in our database if authenticated
+ *     summary: Share a wishlist (User must be authenticated)
  *     responses:
  *       201:
- *         description: A user should be able to share a wishlist in our database if authenticated
+ *         description: Wishlist shared successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to share wishlist.
  */
 router.post('/share-wishlist',
     verifyGeneralApplicationAuthenticationToken,
@@ -112,16 +156,17 @@ router.post('/share-wishlist',
  * @swagger
  * /api/v1/wishlist/search-wishlist:
  *   get:
- *     summary: A user should be able to search for a wishlist in our database if authenticated
+ *     summary: Search for wishlists (User must be authenticated)
  *     responses:
  *       200:
- *         description: A user should be able to search for a wishlist in our database if authenticated
- *       400:
- *         description: Bad request
+ *         description: Wishlists searched successfully.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to search wishlists.
  */
 router.get('/search-wishlist',
     verifyGeneralApplicationAuthenticationToken,
     searchWishlists
 );
-
 export default router;

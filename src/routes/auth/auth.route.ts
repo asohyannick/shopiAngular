@@ -50,9 +50,11 @@ const router = express.Router();
  *                 type: string
  *     responses:
  *       201:
- *         description: User registered successfully
+ *         description: User registered successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       500:
+ *         description: Internal server error. Unable to register user.
  */
 router.post(
     "/register",
@@ -77,10 +79,14 @@ router.post(
  *               password:
  *                 type: string
  *     responses:
- *       201:
- *         description: User has logged in successfully
+ *       200:
+ *         description: User logged in successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       401:
+ *         description: Unauthorized. Invalid email or password.
+ *       500:
+ *         description: Internal server error. Unable to log in.
  */
 router.post(
     "/login", 
@@ -96,9 +102,11 @@ router.post(
  *     summary: Fetch all users
  *     responses:
  *       200:
- *         description: User registered successfully
- *       400:
- *         description: Bad request
+ *         description: Users fetched successfully.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch users.
  */
 router.get(
     "/users",
@@ -110,7 +118,7 @@ router.get(
  * @swagger
  * /api/v1/auth/single-account/{id}:
  *   get:
- *     summary: Fetch a single user
+ *     summary: Fetch a single user by ID
  *     parameters:
  *       - name: id
  *         in: path
@@ -120,9 +128,13 @@ router.get(
  *           type: string
  *     responses:
  *       200:
- *         description: Fetched a single user
- *       400:
- *         description: Bad request
+ *         description: User fetched successfully.
+ *       404:
+ *         description: User not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch user.
  */
 router.get(
     "/single-account/:id",
@@ -134,7 +146,7 @@ router.get(
  * @swagger
  * /api/v1/auth/update-account/{id}:
  *   put:
- *     summary: Update a single user
+ *     summary: Update a single user by ID
  *     parameters:
  *       - name: id
  *         in: path
@@ -144,9 +156,13 @@ router.get(
  *           type: string
  *     responses:
  *       200:
- *         description: Updated a single user in the database
+ *         description: User updated successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       404:
+ *         description: User not found. Please check the ID.
+ *       500:
+ *         description: Internal server error. Unable to update user.
  */
 router.put(
     "/update-account/:id",
@@ -158,7 +174,7 @@ router.put(
  * @swagger
  * /api/v1/auth/delete-account/{id}:
  *   delete:
- *     summary: Delete a single user in our database
+ *     summary: Delete a single user by ID
  *     parameters:
  *       - name: id
  *         in: path
@@ -168,9 +184,13 @@ router.put(
  *           type: string
  *     responses:
  *       200:
- *         description: Deleted a single user in the database
- *       400:
- *         description: Bad request
+ *         description: User deleted successfully.
+ *       404:
+ *         description: User not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to delete user.
  */
 router.delete(
     "/delete-account/:id",
@@ -182,12 +202,14 @@ router.delete(
  * @swagger
  * /api/v1/auth/password-reset:
  *   post:
- *     summary: API endpoint to handle password reset request
+ *     summary: Request a password reset
  *     responses:
- *       201:
- *         description: Password reset request handled successfully
+ *       200:
+ *         description: Password reset request handled successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       500:
+ *         description: Internal server error. Unable to process request.
  */
 router.post(
     "/password-reset", 
@@ -199,7 +221,7 @@ router.post(
  * @swagger
  * /api/v1/auth/set-new-password/{token}:
  *   post:
- *     summary: API endpoint to set a new password
+ *     summary: Set a new password using a reset token
  *     parameters:
  *       - name: token
  *         in: path
@@ -208,10 +230,14 @@ router.post(
  *         schema:
  *           type: string
  *     responses:
- *       201:
- *         description: New password set successfully
+ *       200:
+ *         description: New password set successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       404:
+ *         description: Invalid or expired token.
+ *       500:
+ *         description: Internal server error. Unable to set new password.
  */
 router.post("/set-new-password/:token",
     verifyGeneralApplicationAuthenticationToken,
@@ -222,12 +248,14 @@ router.post("/set-new-password/:token",
  * @swagger
  * /api/v1/auth/logout:
  *   post:
- *     summary: User request to logout from their account
+ *     summary: Logout the authenticated user
  *     responses:
- *       201:
- *         description: User logged out successfully
- *       400:
- *         description: Bad request
+ *       200:
+ *         description: User logged out successfully.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to log out.
  */
 router.post(
     "/logout", 
@@ -240,12 +268,14 @@ router.post(
  * @swagger
  * /api/v1/auth/admin/signup:
  *   post:
- *     summary: Admin request to signup for an account
+ *     summary: Admin signup for an account
  *     responses:
  *       201:
- *         description: Admin signed up successfully
+ *         description: Admin signed up successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       500:
+ *         description: Internal server error. Unable to sign up.
  */
 router.post(
     "/admin/signup",
@@ -257,12 +287,16 @@ router.post(
  * @swagger
  * /api/v1/auth/admin/signin:
  *   post:
- *     summary: Admin request to signin
+ *     summary: Admin login
  *     responses:
- *       201:
- *         description: Admin signed in successfully
+ *       200:
+ *         description: Admin signed in successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       401:
+ *         description: Unauthorized. Invalid email or password.
+ *       500:
+ *         description: Internal server error. Unable to sign in.
  */
 router.post(
     "/admin/signin",
@@ -274,12 +308,14 @@ router.post(
  * @swagger
  * /api/v1/auth/admin/logout:
  *   post:
- *     summary: Admin request to logout
+ *     summary: Admin logout
  *     responses:
- *       201:
- *         description: Admin logged out successfully
- *       400:
- *         description: Bad request
+ *       200:
+ *         description: Admin logged out successfully.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to log out.
  */
 router.post(
     "/admin/logout",
@@ -290,12 +326,16 @@ router.post(
  * @swagger
  * /api/v1/auth/admin/update-account:
  *   put:
- *     summary: Admin request to update their account
+ *     summary: Admin update their account
  *     responses:
- *       201:
- *         description: Admin account updated successfully
+ *       200:
+ *         description: Admin account updated successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       404:
+ *         description: Admin not found. Please check the ID.
+ *       500:
+ *         description: Internal server error. Unable to update account.
  */
 router.put('/admin/update-account',
     adminUpdateAccount // Test this API endpoint before marking it as DONE.
@@ -307,12 +347,14 @@ router.put('/admin/update-account',
  * @swagger
  * /api/v1/auth/google/auth:
  *   post:
- *     summary: User request to login using their Google account
+ *     summary: Login using Google account
  *     responses:
- *       201:
- *         description: User logged in successfully
+ *       200:
+ *         description: User logged in successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       500:
+ *         description: Internal server error. Unable to log in.
  */
 router.post('/google/auth',
     googleAuth
@@ -323,12 +365,14 @@ router.post('/google/auth',
  * @swagger
  * /api/v1/auth/redirect/github:
  *   get:
- *     summary: User request to be authenticated using their GitHub account
+ *     summary: Authenticate using GitHub account
  *     responses:
  *       200:
- *         description: User authenticated successfully
+ *         description: User authenticated successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       500:
+ *         description: Internal server error. Unable to authenticate.
  */
 router.get('/redirect/github',
     gitHubRedirect
@@ -338,12 +382,14 @@ router.get('/redirect/github',
  * @swagger
  * /api/v1/auth/github/auth/callback:
  *   get:
- *     summary: User request to be redirected after GitHub authentication
+ *     summary: Redirect after GitHub authentication
  *     responses:
  *       200:
- *         description: User redirected successfully
+ *         description: User redirected successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       500:
+ *         description: Internal server error. Unable to redirect.
  */
 router.get('/github/auth/callback',
     verifyThirdPartyAuthToken,
@@ -355,12 +401,14 @@ router.get('/github/auth/callback',
  * @swagger
  * /api/v1/auth/redirect/facebook:
  *   get:
- *     summary: User request to be authenticated using their Facebook account
+ *     summary: Authenticate using Facebook account
  *     responses:
  *       200:
- *         description: User authenticated successfully
+ *         description: User authenticated successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       500:
+ *         description: Internal server error. Unable to authenticate.
  */
 router.get('/redirect/facebook',
     faceBookRedirect
@@ -370,12 +418,14 @@ router.get('/redirect/facebook',
  * @swagger
  * /api/v1/auth/facebook/auth/callback:
  *   get:
- *     summary: User request to be redirected back after Facebook authentication
+ *     summary: Redirect after Facebook authentication
  *     responses:
  *       200:
- *         description: User redirected successfully
+ *         description: User redirected successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       500:
+ *         description: Internal server error. Unable to redirect.
  */
 router.get('/facebook/auth/callback',
     verifyThirdPartyAuthToken,

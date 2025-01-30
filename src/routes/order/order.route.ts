@@ -15,158 +15,243 @@ import {
 } from '../../middleware/auth/auth';
 
 const router = express.Router();
-
-// Create all order histories for a user
 /**
  * @swagger
  * /api/v1/order/create-orders:
  *   post:
- *     summary: A user should be able to create an order from our API if authenticated
+ *     summary: Create a new order (User must be authenticated)
  *     responses:
  *       201:
- *         description: A user should be able to create an order from our API if authenticated
+ *         description: Order created successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to create order.
  */
 router.post('/create-orders',
     verifyGeneralApplicationAuthenticationToken,
     createOrderHistory
 );
 
-// Fetch all order histories from the database
 /**
  * @swagger
  * /api/v1/order/orders/{id}/histories:
  *   get:
- *     summary: A user should be able to fetch all of his or her order histories from our API if authenticated
+ *     summary: Fetch all order histories for a user (User must be authenticated)
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the user whose order histories to fetch.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: A user should be able to fetch all of his or her order histories from our API if authenticated
- *       400:
- *         description: Bad request
+ *         description: Order histories fetched successfully.
+ *       404:
+ *         description: User not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch order histories.
  */
 router.get('/orders/:id/histories',
     verifyGeneralApplicationAuthenticationToken,
     fetchAllOrderHistories
 );
 
-// Fetch a single order history associated with a user
 /**
  * @swagger
  * /api/v1/order/orders/{id}/history:
  *   get:
- *     summary: A user should be able to fetch an order history associated with him or her if authenticated
+ *     summary: Fetch a specific order history for a user (User must be authenticated)
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the order history to fetch.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: A user should be able to fetch an order history associated with him or her if authenticated
- *       400:
- *         description: Bad request
+ *         description: Order history fetched successfully.
+ *       404:
+ *         description: Order history not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch order history.
  */
 router.get('/orders/:id/history',
     verifyGeneralApplicationAuthenticationToken,
     orderHistory
 );
 
-// Fetch a single order history details 
 /**
  * @swagger
  * /api/v1/order/orders-detail/{id}:
  *   get:
- *     summary: A user should be able to fetch a single order history detail associated from our API if authenticated
+ *     summary: Fetch details of a specific order history (User must be authenticated)
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the order history detail to fetch.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: A user should be able to fetch a single order history detail associated from our API if authenticated
- *       400:
- *         description: Bad request
+ *         description: Order history details fetched successfully.
+ *       404:
+ *         description: Order history not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch order history details.
  */
 router.get('/orders-detail/:id',
     verifyGeneralApplicationAuthenticationToken,
     orderHistoryDetails
 );
 
-// Fetch order history with a unique user 
 /**
  * @swagger
  * /api/v1/order/fetch-orders/{userId}:
  *   get:
- *     summary: A user should be able to fetch order histories associated with a unique user if authenticated
+ *     summary: Fetch all order histories for a specific user (User must be authenticated)
+ *     parameters:
+ *       - name: userId
+ *         in: path
+ *         required: true
+ *         description: ID of the user whose order histories to fetch.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: A user should be able to fetch order histories associated with a unique user if authenticated
- *       400:
- *         description: Bad request
+ *         description: User's order histories fetched successfully.
+ *       404:
+ *         description: User not found. Please check the user ID.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch order histories.
  */
 router.get('/fetch-orders/:userId',
     verifyGeneralApplicationAuthenticationToken,
     fetchUserOrders
 );
 
-// Update a single order history
 /**
  * @swagger
  * /api/v1/order/update-order/{id}/history:
  *   put:
- *     summary: A user should be able to update a single order history associated with him or her if authenticated
+ *     summary: Update a specific order history (User must be authenticated)
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the order history to update.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: A user should be able to update a single order history if authenticated
+ *         description: Order history updated successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       404:
+ *         description: Order history not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to update order history.
  */
 router.put('/update-order/:id/history',
     verifyGeneralApplicationAuthenticationToken,
     updateOrderHistory
 );
 
-// Cancel an order history
 /**
  * @swagger
  * /api/v1/order/orders/{id}/cancel:
  *   post:
- *     summary: A user should be able to cancel a single order history from our API if authenticated
+ *     summary: Cancel a specific order history (User must be authenticated)
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the order history to cancel.
+ *         schema:
+ *           type: string
  *     responses:
- *       201:
- *         description: A user should be able to cancel an order from our API if authenticated
+ *       200:
+ *         description: Order history canceled successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       404:
+ *         description: Order history not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to cancel order history.
  */
 router.post('/orders/:id/cancel',
     verifyGeneralApplicationAuthenticationToken,
     cancelAnOrder
 );
 
-// Delete an order history
 /**
  * @swagger
  * /api/v1/order/order-history/{historyId}:
  *   delete:
- *     summary: A user should be able to delete an order history from our API if authenticated
+ *     summary: Delete a specific order history (User must be authenticated)
+ *     parameters:
+ *       - name: historyId
+ *         in: path
+ *         required: true
+ *         description: ID of the order history to delete.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: A user should be able to delete an order history from our API if authenticated
- *       400:
- *         description: Bad request
+ *         description: Order history deleted successfully.
+ *       404:
+ *         description: Order history not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to delete order history.
  */
 router.delete('/order-history/:historyId',
     verifyGeneralApplicationAuthenticationToken,
     deleteOrderHistory
 );
 
-// Fetch past order history of a user
 /**
  * @swagger
  * /api/v1/order/orders/history/{userId}:
  *   get:
- *     summary: A user should be able to fetch a single past order history associated to him or her if authenticated
+ *     summary: Fetch past order history for a user (User must be authenticated)
+ *     parameters:
+ *       - name: userId
+ *         in: path
+ *         required: true
+ *         description: ID of the user whose past order history to fetch.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: A user should be able to fetch a single past order history from our API if authenticated
- *       400:
- *         description: Bad request
+ *         description: Past order history fetched successfully.
+ *       404:
+ *         description: User not found. Please check the user ID.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch past order history.
  */
 router.get('/orders/history/:userId',
     verifyGeneralApplicationAuthenticationToken,
     pastOrder
 );
-
 export default router;

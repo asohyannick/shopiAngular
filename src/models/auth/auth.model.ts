@@ -67,6 +67,10 @@ const authSchema = new mongoose.Schema<AuthType & {cart: CartProduct[] }>({
         type: String,
         required: true,
     }],
+    fcmToken:{
+        type:String,
+        required: true,
+    },
 }, { timestamps: true })
 authSchema.pre<AuthType>('save', async function (next) {
     // Check if password is modified or if it's a new document

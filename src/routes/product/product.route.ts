@@ -17,24 +17,28 @@ import {
     updateReview,
     deleteReview,
 } from "../../controllers/product/productController";
-import { notifyAllUsers } from '../../controllers/emailNotifications/sentEmailController';
-
+import schemaValidator from '../../middleware/schemaValidator/schemaValidator';
 const router = express.Router();
 
 /**
  * @swagger
  * /api/v1/product/create-product:
  *   post:
- *     summary: Admin should be able to create a product if he is authenticated
+ *     summary: Create a new product (Admin only)
  *     responses:
  *       201:
- *         description: Admin should be able to create a product if he is authenticated
+ *         description: Product created successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to create product.
  */
 router.post('/create-product',
     verifySuperAdminToken,
     verifyAdminExist,
+    schemaValidator('/product/create-product'),
     createProduct
 );
 
@@ -42,12 +46,14 @@ router.post('/create-product',
  * @swagger
  * /api/v1/product/fetch-all-products:
  *   get:
- *     summary: Admin should be able to fetch all products if he is authenticated
+ *     summary: Fetch all products (Admin only)
  *     responses:
  *       200:
- *         description: Admin should be able to fetch all products if he is authenticated
- *       400:
- *         description: Bad request
+ *         description: Products fetched successfully.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch products.
  */
 router.get('/fetch-all-products', 
     verifySuperAdminToken,
@@ -59,12 +65,21 @@ router.get('/fetch-all-products',
  * @swagger
  * /api/v1/product/fetch-product/{id}:
  *   get:
- *     summary: Admin should be able to fetch a product if he is authenticated
+ *     summary: Fetch a single product by ID (Admin only)
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the product to fetch.
  *     responses:
  *       200:
- *         description: Admin should be able to fetch a product if he is authenticated
- *       400:
- *         description: Bad request
+ *         description: Product fetched successfully.
+ *       404:
+ *         description: Product not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch product.
  */
 router.get('/fetch-product/:id', 
     verifySuperAdminToken,
@@ -76,12 +91,23 @@ router.get('/fetch-product/:id',
  * @swagger
  * /api/v1/product/update-product/{id}:
  *   put:
- *     summary: Admin should be able to update a product if he is authenticated
+ *     summary: Update an existing product (Admin only)
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the product to update.
  *     responses:
  *       200:
- *         description: Admin should be able to update a product if he is authenticated
+ *         description: Product updated successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       404:
+ *         description: Product not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to update product.
  */
 router.put('/update-product/:id', 
     verifySuperAdminToken,
@@ -93,12 +119,21 @@ router.put('/update-product/:id',
  * @swagger
  * /api/v1/product/delete-product/{id}:
  *   delete:
- *     summary: Admin should be able to delete a product if he is authenticated
+ *     summary: Delete a product (Admin only)
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the product to delete.
  *     responses:
  *       200:
- *         description: Admin should be able to delete a product if he is authenticated
- *       400:
- *         description: Bad request
+ *         description: Product deleted successfully.
+ *       404:
+ *         description: Product not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to delete product.
  */
 router.delete('/delete-product/:id', 
     verifySuperAdminToken,
@@ -110,12 +145,14 @@ router.delete('/delete-product/:id',
  * @swagger
  * /api/v1/product/search-products:
  *   get:
- *     summary: Admin and normal users should be able to search, filter, and paginate across all products if authenticated
+ *     summary: Search, filter, and paginate products (Admin and users)
  *     responses:
  *       200:
- *         description: Admin and normal users should be able to search, filter, and paginate across all products if authenticated
- *       400:
- *         description: Bad request
+ *         description: Products fetched successfully based on search criteria.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to perform search.
  */
 router.get('/search-products',
     verifyGeneralApplicationAuthenticationToken,
@@ -133,12 +170,16 @@ router.get('/search-products',
  * @swagger
  * /api/v1/product/{productId}/create-reviews:
  *   post:
- *     summary: Both admin and normal users should be able to create reviews if they are authenticated
+ *     summary: Create a review for a product (Admin and users)
  *     responses:
  *       201:
- *         description: Both admin and normal users should be able to create reviews if they are authenticated
+ *         description: Review created successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to create review.
  */
 router.post("/:productId/create-reviews", 
     verifyGeneralApplicationAuthenticationToken,
@@ -155,12 +196,14 @@ router.post("/:productId/create-reviews",
  * @swagger
  * /api/v1/product/{productId}/fetch-reviews:
  *   get:
- *     summary: Both admin and normal users should be able to fetch product reviews if they are authenticated
+ *     summary: Fetch reviews for a product (Admin and users)
  *     responses:
  *       200:
- *         description: Both admin and normal users should be able to fetch product reviews if they are authenticated
- *       400:
- *         description: Bad request
+ *         description: Reviews fetched successfully.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch reviews.
  */
 router.get("/:productId/fetch-reviews", 
     verifyGeneralApplicationAuthenticationToken,
@@ -177,12 +220,16 @@ router.get("/:productId/fetch-reviews",
  * @swagger
  * /api/v1/product/{productId}/fetch-review/{reviewId}:
  *   get:
- *     summary: Both admin and normal users should be able to fetch a product review if they are authenticated
+ *     summary: Fetch a specific review for a product (Admin and users)
  *     responses:
  *       200:
- *         description: Both admin and normal users should be able to fetch a product review if they are authenticated
- *       400:
- *         description: Bad request
+ *         description: Review fetched successfully.
+ *       404:
+ *         description: Review not found. Please check the IDs.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch review.
  */
 router.get("/:productId/fetch-review/:reviewId", 
     verifyGeneralApplicationAuthenticationToken,
@@ -199,12 +246,18 @@ router.get("/:productId/fetch-review/:reviewId",
  * @swagger
  * /api/v1/product/{productId}/update-review/{reviewId}:
  *   put:
- *     summary: Both admin and normal users should be able to update a product review if they are authenticated
+ *     summary: Update a review for a product (Admin and users)
  *     responses:
  *       200:
- *         description: Both admin and normal users should be able to update a product review if they are authenticated
+ *         description: Review updated successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       404:
+ *         description: Review not found. Please check the IDs.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to update review.
  */
 router.put("/:productId/update-review/:reviewId", 
     verifyGeneralApplicationAuthenticationToken,
@@ -221,12 +274,16 @@ router.put("/:productId/update-review/:reviewId",
  * @swagger
  * /api/v1/product/{productId}/delete-review/{reviewId}:
  *   delete:
- *     summary: Both admin and normal users should be able to delete a product review if they are authenticated
+ *     summary: Delete a review for a product (Admin and users)
  *     responses:
  *       200:
- *         description: Both admin and normal users should be able to delete a product review if they are authenticated
- *       400:
- *         description: Bad request
+ *         description: Review deleted successfully.
+ *       404:
+ *         description: Review not found. Please check the IDs.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to delete review.
  */
 router.delete("/:productId/delete-review/:reviewId", 
     verifyGeneralApplicationAuthenticationToken,
@@ -238,28 +295,4 @@ router.delete("/:productId/delete-review/:reviewId",
     }, 
     deleteReview
 );
-
-/**
- * @swagger
- * /api/v1/product/notify:
- *   post:
- *     summary: Both admin and normal users should be able to sent email notification to all user if they are authenticated
- *     responses:
- *       201:
- *         description: Both admin and normal users email notification to all users if they are authenticated
- *       400:
- *         description: Bad request
- */
-
-router.post('/notify',
-  verifyGeneralApplicationAuthenticationToken,
- (req: Request, res: Response, next: NextFunction) => {
-    if (req.user && req.user.isAdmin) {
-        return next();
-    }
-    return verifySuperAdminToken(req, res, next);
- }, 
- notifyAllUsers,
-)
-
 export default router;

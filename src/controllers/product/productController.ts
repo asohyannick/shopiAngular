@@ -4,16 +4,17 @@ import ProductModel from "../../models/product/product.model";
 import mongoose from 'mongoose';
 import { ParsedQs } from 'qs';
 import { ReviewType } from '../../types/productType/productType';
-
+import { sendPushNotifications } from '../notificationManager/notificationController';
 const createProduct = async(req:Request, res:Response): Promise<Response> => {
     if (!req.user || !req.user.isAdmin) {
         return res.status(StatusCodes.FORBIDDEN).json({message: "You are not allowed to create a product"});
     }
     try {
-        const createOneProduct = await ProductModel.create(req.body);
+        const newProduct = await ProductModel.create(req.body);
+        await sendPushNotifications(res, 'New Product Alert', `Check out our new products ${newProduct.name}`);
         return res.status(StatusCodes.CREATED).json({
             message:"Product has been created successfully!",
-            product: createOneProduct
+            data: newProduct
         });
     } catch (error) {
         console.log("Error occur while creating a product", error);

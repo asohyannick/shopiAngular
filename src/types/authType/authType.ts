@@ -18,4 +18,5 @@ export interface AuthType extends Document {
     cart: CartProduct[] ;
     active: boolean;
     userUpdates:string[];
+    fcmToken: string;
 }

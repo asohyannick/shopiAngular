@@ -18,17 +18,20 @@ import {
 } from '../../middleware/auth/auth';
 
 const router = express.Router();
-
 /**
  * @swagger
  * /api/v1/sales/create-sale:
  *   post:
- *     summary: An admin should be able to create sales from our API if authenticated
+ *     summary: Create a new sale (Admin must be authenticated)
  *     responses:
  *       201:
- *         description: An admin should be able to create sales from our API if authenticated  
+ *         description: Sale created successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to create sale.
  */
 router.post('/create-sale', 
     verifySuperAdminToken, 
@@ -40,12 +43,14 @@ router.post('/create-sale',
  * @swagger
  * /api/v1/sales/reports/fetch-sales:
  *   get:
- *     summary: An admin should be able to fetch all sales reports from our API if authenticated
+ *     summary: Fetch all sales reports (Admin must be authenticated)
  *     responses:
  *       200:
- *         description: An admin should be able to fetch all sales reports from our API if authenticated  
- *       400:
- *         description: Bad request
+ *         description: Sales reports fetched successfully.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch sales reports.
  */
 router.get('/reports/fetch-sales', 
     verifySuperAdminToken, 
@@ -57,19 +62,23 @@ router.get('/reports/fetch-sales',
  * @swagger
  * /api/v1/sales/reports/fetch-sale/{id}:
  *   get:
- *     summary: An admin should be able to fetch a sale report from our API if authenticated
+ *     summary: Fetch a specific sale report (Admin must be authenticated)
  *     parameters:
  *       - name: id
  *         in: path
  *         required: true
- *         description: ID of the sale to fetch
+ *         description: ID of the sale to fetch.
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: An admin should be able to fetch a sale report from our API if authenticated  
- *       400:
- *         description: Bad request
+ *         description: Sale report fetched successfully.
+ *       404:
+ *         description: Sale report not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch sale report.
  */
 router.get('/reports/fetch-sale/:id', 
     verifySuperAdminToken, 
@@ -81,19 +90,25 @@ router.get('/reports/fetch-sale/:id',
  * @swagger
  * /api/v1/sales/reports/update-sale/{id}:
  *   put:
- *     summary: An admin should be able to update a sale report from our API if authenticated
+ *     summary: Update a specific sale report (Admin must be authenticated)
  *     parameters:
  *       - name: id
  *         in: path
  *         required: true
- *         description: ID of the sale to update
+ *         description: ID of the sale to update.
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: An admin should be able to update a sale report from our API if authenticated  
+ *         description: Sale report updated successfully.
  *       400:
- *         description: Bad request
+ *         description: Bad request. Please check the input data.
+ *       404:
+ *         description: Sale report not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to update sale report.
  */
 router.put('/reports/update-sale/:id', 
     verifySuperAdminToken, 
@@ -105,19 +120,23 @@ router.put('/reports/update-sale/:id',
  * @swagger
  * /api/v1/sales/reports/sales/{id}:
  *   delete:
- *     summary: An admin should be able to remove a sale report from our API if authenticated
+ *     summary: Remove a specific sale report (Admin must be authenticated)
  *     parameters:
  *       - name: id
  *         in: path
  *         required: true
- *         description: ID of the sale to delete
+ *         description: ID of the sale to delete.
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: An admin should be able to remove a sale report from our API if authenticated  
- *       400:
- *         description: Bad request
+ *         description: Sale report deleted successfully.
+ *       404:
+ *         description: Sale report not found. Please check the ID.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to delete sale report.
  */
 router.delete('/reports/sales/:id', 
     verifySuperAdminToken, 
@@ -129,12 +148,14 @@ router.delete('/reports/sales/:id',
  * @swagger
  * /api/v1/sales/reports/total-sales/pdf:
  *   get:
- *     summary: An admin should be able to fetch total sales report from our API if authenticated
+ *     summary: Fetch total sales report (Admin must be authenticated)
  *     responses:
  *       200:
- *         description: An admin should be able to fetch total sales report from our API if authenticated  
- *       400:
- *         description: Bad request
+ *         description: Total sales report fetched successfully.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch total sales report.
  */
 router.get('/reports/total-sales/pdf', 
     verifySuperAdminToken, 
@@ -146,12 +167,14 @@ router.get('/reports/total-sales/pdf',
  * @swagger
  * /api/v1/sales/reports/sales-by-product/pdf:
  *   get:
- *     summary: An admin should be able to fetch total sales report of any product if authenticated
+ *     summary: Fetch sales report by product (Admin must be authenticated)
  *     responses:
  *       200:
- *         description: An admin should be able to fetch total sales report from our API if authenticated  
- *       400:
- *         description: Bad request
+ *         description: Sales report by product fetched successfully.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch sales report by product.
  */
 router.get('/reports/sales-by-product/pdf', 
     verifySuperAdminToken, 
@@ -163,12 +186,14 @@ router.get('/reports/sales-by-product/pdf',
  * @swagger
  * /api/v1/sales/reports/sales/pdf:
  *   get:
- *     summary: An admin should be able to filter total sales reports from our API if authenticated
+ *     summary: Filter total sales reports (Admin must be authenticated)
  *     responses:
  *       200:
- *         description: An admin should be able to filter total sales reports from our API if authenticated  
- *       400:
- *         description: Bad request
+ *         description: Total sales reports filtered successfully.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to filter total sales reports.
  */
 router.get('/reports/sales/pdf', 
     verifySuperAdminToken, 
@@ -180,12 +205,14 @@ router.get('/reports/sales/pdf',
  * @swagger
  * /api/v1/sales/reports/average-sales/pdf:
  *   get:
- *     summary: An admin should be able to fetch average sales report from our API if authenticated
+ *     summary: Fetch average sales report (Admin must be authenticated)
  *     responses:
  *       200:
- *         description: An admin should be able to fetch average sales report from our API if authenticated  
- *       400:
- *         description: Bad request
+ *         description: Average sales report fetched successfully.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch average sales report.
  */
 router.get('/reports/average-sales/pdf', 
     verifySuperAdminToken, 
@@ -197,12 +224,14 @@ router.get('/reports/average-sales/pdf',
  * @swagger
  * /api/v1/sales/reports/top-selling-product/pdf:
  *   get:
- *     summary: An admin should be able to fetch all top selling product sales from our API if authenticated
+ *     summary: Fetch top-selling product sales report (Admin must be authenticated)
  *     responses:
  *       200:
- *         description: An admin should be able to fetch all top selling products from our API if authenticated  
- *       400:
- *         description: Bad request
+ *         description: Top-selling product sales report fetched successfully.
+ *       401:
+ *         description: Unauthorized. Admin must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to fetch top-selling product sales report.
  */
 router.get('/reports/top-selling-product/pdf', 
     verifySuperAdminToken, 
