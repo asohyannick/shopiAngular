@@ -17,6 +17,7 @@ import {
     updateReview,
     deleteReview,
 } from "../../controllers/product/productController";
+import { notifyAllUsers } from '../../controllers/emailNotifications/sentEmailController';
 
 const router = express.Router();
 
@@ -237,5 +238,28 @@ router.delete("/:productId/delete-review/:reviewId",
     }, 
     deleteReview
 );
+
+/**
+ * @swagger
+ * /api/v1/product/notify:
+ *   post:
+ *     summary: Both admin and normal users should be able to sent email notification to all user if they are authenticated
+ *     responses:
+ *       201:
+ *         description: Both admin and normal users email notification to all users if they are authenticated
+ *       400:
+ *         description: Bad request
+ */
+
+router.post('/notify',
+  verifyGeneralApplicationAuthenticationToken,
+ (req: Request, res: Response, next: NextFunction) => {
+    if (req.user && req.user.isAdmin) {
+        return next();
+    }
+    return verifySuperAdminToken(req, res, next);
+ }, 
+ notifyAllUsers,
+)
 
 export default router;

@@ -425,7 +425,7 @@ const setNewAccountPassword = async (req: Request, res: Response): Promise<Respo
         user.resetPasswordToken = undefined; // Clear the reset token
         user.resetPasswordExpires = undefined; // Clear the expiration time
         await user.save(); // Save the updated user data
-
+        
         return res.status(StatusCodes.OK).json({ message: "Password has been reset successfully." });
     } catch (error) {
         console.error('Error resetting password', error);
