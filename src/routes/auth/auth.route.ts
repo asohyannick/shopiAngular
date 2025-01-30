@@ -25,7 +25,8 @@ import {
     verifyGeneralApplicationAuthenticationToken,
     verifyThirdPartyAuthToken
 } from '../../middleware/auth/auth';
-
+import { redirectClient, AuthenticateInstagramUser } from '../../controllers/auth/instagramAuth/instagramAuth';
+import { twitterAuth, twitterAuthentication } from '../../controllers/auth/twitterAuth/twitterAuth';
 const router = express.Router();
 
 /**
@@ -430,6 +431,110 @@ router.get('/redirect/facebook',
 router.get('/facebook/auth/callback',
     verifyThirdPartyAuthToken,
     faceBookAuthentication
+);
+
+/**
+ * @swagger
+ * /api/v1/auth/auth/instagram:
+ *   get:
+ *     summary: Redirect to Instagram for authentication
+ *     description: Redirects the user to the Instagram login page for authentication.
+ *     tags:
+ *       - Authentication
+ *     responses:
+ *       302:
+ *         description: Redirects to Instagram login
+ *       403:
+ *         description: Unauthorized access
+ */
+router.get('/auth/instagram',
+    verifyThirdPartyAuthToken,
+    (req, res) => {
+        // Your redirect logic here
+        redirectClient(req, res);
+    }
+);
+
+/**
+ * @swagger
+ * /api/v1/auth/instagram/auth/callback:
+ *   get:
+ *     summary: Handle Instagram authentication callback
+ *     description: Exchange the authorization code for an access token and authenticate the user.
+ *     tags:
+ *       - Authentication
+ *     parameters:
+ *       - name: code
+ *         in: query
+ *         required: true
+ *         description: The authorization code received from Instagram.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Authentication successful
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               example: Authentication successful
+ *             token:
+ *               type: string
+ *               example: jwt.token.here
+ *       400:
+ *         description: Invalid Credentials
+ *       500:
+ *         description: Authentication failed
+ */
+router.get('/instagram/auth/callback',
+    verifyThirdPartyAuthToken,
+    AuthenticateInstagramUser
+);
+
+/**
+ * @swagger
+ * tags:
+ *   name: TwitterAuth
+ *   description: Twitter authentication endpoints
+ */
+
+/**
+ * @swagger
+ * /api/v1/auth/twitter/auth/register:
+ *   get:
+ *     summary: Initiate Twitter authentication
+ *     tags: [TwitterAuth]
+ *     description: Redirects the user to Twitter for authentication.
+ *     responses:
+ *       302:
+ *         description: Redirected to Twitter for authentication.
+ *       500:
+ *         description: Internal server error.
+ */
+router.get('/twitter/auth/register',
+    verifyThirdPartyAuthToken,
+    twitterAuth
+);
+
+/**
+ * @swagger
+ * /api/v1/auth/twitter/auth/callback:
+ *   get:
+ *     summary: Handle Twitter authentication callback
+ *     tags: [TwitterAuth]
+ *     description: Handles the callback from Twitter after the user has authenticated.
+ *     responses:
+ *       200:
+ *         description: Authentication successful, returns JWT.
+ *       400:
+ *         description: Bad request due to missing or invalid parameters.
+ *       500:
+ *         description: Internal server error.
+ */
+router.get('/twitter/auth/callback',
+    verifyThirdPartyAuthToken,
+    twitterAuthentication
 );
 
 export default router;
