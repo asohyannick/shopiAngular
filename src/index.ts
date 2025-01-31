@@ -14,7 +14,8 @@ import limiter from "./middleware/limiter/limiter";
 import { rateLimiterMiddleware } from "./middleware/limiter/rateLimiter";
 // routes
 import authRoute from "./routes/auth/auth.route";
-import aboutMeRoute from './routes/aboutMe/aboutMe.route'
+import aboutMeRoute from './routes/aboutMe/aboutMe.route';
+import contactMeRoute from './routes/contactMe/contactMe.route';
 import userRoute from './routes/user/user.route';
 import productRoute from './routes/product/product.route';
 import wishListRoute from './routes/wishList/wishList.route';
@@ -74,7 +75,8 @@ app.use(rateLimiterMiddleware); // This limits a user to make only 10 requests p
 
 // Routes Registration
 app.use(`/api/${process.env.API_VERSION}/auth`, authRoute);
-app.use(`/api/${process.env.API_VERSION}/contact`, aboutMeRoute);
+app.use(`/api/${process.env.API_VERSION}/about-me`, aboutMeRoute);
+app.use(`/api/${process.env.API_VERSION}/contact-me`, contactMeRoute);
 app.use(`/api/${process.env.API_VERSION}/user`, userRoute);
 app.use(`/api/${process.env.API_VERSION}/product`, productRoute);
 app.use(`/api/${process.env.API_VERSION}/notify`, notificationManagerRoute);

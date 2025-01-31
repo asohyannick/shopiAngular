@@ -1,4 +1,4 @@
-import Joi, { ObjectSchema } from "@hapi/joi";
+import Joi, {  ObjectSchema } from "@hapi/joi";
 const PASSWORD_REGEX = new RegExp(
     "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!.@#$%^&*])(?=.{8,})"
 );
@@ -96,11 +96,36 @@ const profileSchema = Joi.object({
 });
 
 
+const contactValidationSchema = Joi.object({
+    name: Joi.string()
+        .required()
+        .trim(),
+    email: Joi.string()
+        .email()
+        .required()
+        .trim()
+        .lowercase(),
+    phone: Joi.string()
+        .optional()
+        .pattern(/^(?:\+\d{1,3})?\d{10}$/, { name: 'phone' }), // Optional phone validation
+    date: Joi.date().required().greater('now'), // Ensure the date is in the future
+    subject: Joi.string()
+        .required()
+        .trim(),
+    message: Joi.string()
+        .required()
+        .trim()
+        .min(10),
+});
+
+
+
 export default {
     "/auth/register": authRegister,
     "/auth/login": authLogin,
     "/auth/admin/signup": adminSignUp,
     "/auth/admin/signin": adminLogin ,
     "/product/create-product": productValidationSchema,
-    "/contact/create-profile": profileSchema,
+    "/about-me/create-profile": profileSchema,
+    "/contact-me/create-contact": contactValidationSchema,
 } as { [key: string]: ObjectSchema }

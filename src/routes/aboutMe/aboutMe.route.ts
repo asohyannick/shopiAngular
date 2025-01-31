@@ -20,7 +20,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/v1/contact/create-profile:
+ * /api/v1/about-me/create-profile:
  *   post:
  *     summary: Create a new user profile
  *     tags: [AboutMe]
@@ -135,14 +135,14 @@ const router = express.Router();
  *         description: Internal server error.
  */
 router.post('/create-profile',
-    schemaValidator('/contact/create-profile'),
+    schemaValidator('/about-me/create-profile'),
     verifyGeneralApplicationAuthenticationToken,
     createProfile
 );
 
 /**
  * @swagger
- * /api/v1/contact/fetch-profiles:
+ * /api/v1/about-me/fetch-profiles:
  *   get:
  *     summary: Fetch all user profiles
  *     tags: [AboutMe]
@@ -168,7 +168,7 @@ router.get('/fetch-profiles',
 
 /**
  * @swagger
- * /api/v1/contact/fetch-profile/{id}:
+ * /api/v1/about-me/fetch-profile/{id}:
  *   get:
  *     summary: Fetch a user profile by ID
  *     tags: [AboutMe]
@@ -197,7 +197,7 @@ router.get('/fetch-profile/:id',
 
 /**
  * @swagger
- * /api/v1/contact/update-profile/{id}:
+ * /api/v1/about-me/update-profile/{id}:
  *   put:
  *     summary: Update a user profile by ID
  *     tags: [AboutMe]
@@ -259,7 +259,7 @@ router.put('/update-profile/:id',
 
 /**
  * @swagger
- * /api/v1/contact/remove-profile/{id}:
+ * /api/v1/about-me/remove-profile/{id}:
  *   delete:
  *     summary: Remove a user profile by ID
  *     tags: [AboutMe]
