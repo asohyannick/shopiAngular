@@ -25,7 +25,9 @@ import salesRoute from './routes/sales/sales.route';
 import customerRoute from './routes/customer/customer.route';
 import stockRoute from './routes/stock/stock.route';
 import notificationManagerRoute from './routes/notificationManager/notificationManager.route'  
-import chatRoute from './routes/chat/chat.route'
+import chatRoute from './routes/chat/chat.route';
+import stripeRoute from './routes/payments/stripe/stripe.route';
+import paypalRoute from './routes/payments/paypal/paypal.route';
 // DB 
 import databaseConfiguration from "./config/databaseConfig/databaseConfig";
 const app: Application = express();
@@ -84,6 +86,8 @@ app.use(`/api/${process.env.API_VERSION}/order`, orderRoute);
 app.use(`/api/${process.env.API_VERSION}/sales`, salesRoute);
 app.use(`/api/${process.env.API_VERSION}/customer`, customerRoute);
 app.use(`/api/${process.env.API_VERSION}/chat`, chatRoute);
+app.use(`/api/${process.env.API_VERSION}/stripe-payment`, stripeRoute);
+app.use(`/api/${process.env.API_VERSION}/paypal-payment`, paypalRoute);
 
 //  Socket.IO Connection Handling
 io.on('connection', (socket) => {
