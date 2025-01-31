@@ -41,7 +41,7 @@ const productSchema = new mongoose.Schema<productType>({
         type:String,
         required: true,
     },
-    images:{
+    imageURLs:{
         type: [String], // Specify the type of array
         required: true,
         default:[
@@ -112,7 +112,10 @@ reviewDate:{
     required: true,
 }
 }],
-
+creator:[{
+    type:[String],
+    required: true,
+}],
 }, {timestamps: true});
 
 const ProductModel = mongoose.model('Product', productSchema);

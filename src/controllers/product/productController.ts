@@ -1,26 +1,111 @@
-import { Request, Response  } from 'express';
+import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import ProductModel from "../../models/product/product.model";
+import { sendPushNotifications } from '../notificationManager/notificationController';
+import cloudinary from '../../config/cloudinaryConfig/cloudinaryConfig';
+import multer from 'multer';
+import { ReviewType } from '../../types/productType/productType';
 import mongoose from 'mongoose';
 import { ParsedQs } from 'qs';
-import { ReviewType } from '../../types/productType/productType';
-import { sendPushNotifications } from '../notificationManager/notificationController';
-const createProduct = async(req:Request, res:Response): Promise<Response> => {
+
+// Define the expected structure of the Cloudinary response
+interface CloudinaryUploadResponse {
+    secure_url: string;
+    // Include any other properties from the response you may need
+}
+
+// Configure multer
+const storage = multer.memoryStorage(); // Store files in memory
+const upload = multer({ storage: storage }); // Multer setup with memory storage
+
+// Defining the upload images function
+const uploadImages = upload.array('imageURLs', 20);
+
+const createProduct = async (req: Request, res: Response): Promise<Response> => {
+    const {
+        name,
+        description,
+        quantity,
+        price,
+        country,
+        category,
+        rating,
+        posted_Date,
+        brand,
+        specifications,
+        duration,
+        isFeatured,
+        discount,
+        stockStatus,
+        dimensions,
+        warrantyPeriod,
+        tags,
+        customerReviews,
+        creator,
+    } = req.body;
+
     if (!req.user || !req.user.isAdmin) {
-        return res.status(StatusCodes.FORBIDDEN).json({message: "You are not allowed to create a product"});
+        return res.status(StatusCodes.FORBIDDEN).json({ message: "You are not allowed to create a product" });
     }
+
     try {
-        const newProduct = await ProductModel.create(req.body);
+        const files = req.files as Express.Multer.File[]; // Get the uploaded files
+
+        if (!files || files.length === 0) {
+            return res.status(StatusCodes.NOT_FOUND).json({ message: "No images provided" });
+        }
+
+        const uploadedImageURLs: string[] = []; // Use a different name to avoid conflict
+
+        // Upload each file to Cloudinary
+        for (const file of files) {
+            const result = await new Promise<CloudinaryUploadResponse>((resolve, reject) => {
+                const stream = cloudinary.uploader.upload_stream((error, result) => {
+                    if (error) reject(error);
+                    else resolve(result as CloudinaryUploadResponse);
+                });
+                stream.end(file.buffer); // Use buffer from memory storage
+            });
+
+            // Ensure the result has a secure_url
+            uploadedImageURLs.push(result.secure_url);
+        }
+
+        const newProduct = new ProductModel({
+            name,
+            description,
+            quantity,
+            price,
+            country,
+            category,
+            rating,
+            posted_Date,
+            brand,
+            imageURLs: uploadedImageURLs, // Use the uploaded image URLs
+            specifications,
+            duration,
+            isFeatured,
+            discount,
+            stockStatus,
+            dimensions,
+            warrantyPeriod,
+            tags,
+            customerReviews,
+            creator,
+        });
+        
+        await newProduct.save();
         await sendPushNotifications(res, 'New Product Alert', `Check out our new products ${newProduct.name}`);
+
         return res.status(StatusCodes.CREATED).json({
-            message:"Product has been created successfully!",
-            data: newProduct
+            message: "Product has been created successfully!",
+            data: newProduct,
         });
     } catch (error) {
-        console.log("Error occur while creating a product", error);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({message: "Something went wrong"});
+        console.error("Error occurred while creating a product", error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });
     }
-}
+};
 
 const fetchAllProducts = async(req:Request, res:Response): Promise<Response> => {
     if (!req.user || !req.user.isAdmin) {
@@ -321,6 +406,7 @@ const deleteReview = async(req: Request, res:Response) => {
 
 export {
     createProduct,
+    uploadImages,
     fetchAllProducts,
     fetchProduct,
     updateProduct,

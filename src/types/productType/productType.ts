@@ -19,7 +19,7 @@ category: string;
 rating: number;
 posted_Date: Date;
 brand: string;
-images: string[];
+imageURLs: string[];
 specifications: string;
 duration: number; 
 isFeatured: boolean;
@@ -34,4 +34,5 @@ warrantyPeriod: string;  // Duration of warranty
 returnPolicy: string;    // Description of the return policy
 tags: string[];          // Array of tags for better searchability
 customerReviews: ReviewType[]       // Object to hold customer reviews    
+creator:string[];
 }

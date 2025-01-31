@@ -60,9 +60,40 @@ const productValidationSchema = Joi.object({
         reviewText: Joi.string().required(),
         rating: Joi.number().min(0).max(5).required(), // Assuming a rating scale of 0 to 5
         reviewDate: Joi.date().required(),
-    })).optional(), // Optional, in case there are no reviews initially
+    })).optional(),    // Optional, in case there are no reviews initially
+    creator: Joi.string().required(),
 });
 
+
+const profileSchema = Joi.object({
+    fullName: Joi.string().min(3).max(100).required(),
+    title: Joi.string().min(3).max(50).required(),
+    summary: Joi.string().min(10).max(500).required(),
+    skills: Joi.array().items(Joi.string()).min(1).required(),
+    experience: Joi.array().items(Joi.object({
+        company: Joi.string().min(2).max(100).required(),
+        position: Joi.string().min(2).max(50).required(),
+        startDate: Joi.date().required(),
+        endDate: Joi.date().allow(null), // Allow null for current positions
+        description: Joi.string().max(500).required(),
+    })).optional(),
+    education: Joi.array().items(Joi.object({
+        institution: Joi.string().min(2).max(100).required(),
+        degree: Joi.string().min(2).max(50).required(),
+        startDate: Joi.date().required(),
+        endDate: Joi.date().required(),
+    })).optional(),
+    projects: Joi.array().items(Joi.object({
+        title: Joi.string().min(2).max(100).required(),
+        description: Joi.string().max(500).required(),
+        link: Joi.string().uri().required(),
+    })).optional(),
+    contactInfo: Joi.object({
+        email: Joi.string().email().required(),
+        phone: Joi.string().optional(),
+        linkedin: Joi.string().uri().optional(),
+    }).required(),
+});
 
 
 export default {
@@ -71,4 +102,5 @@ export default {
     "/auth/admin/signup": adminSignUp,
     "/auth/admin/signin": adminLogin ,
     "/product/create-product": productValidationSchema,
+    "/contact/create-profile": profileSchema,
 } as { [key: string]: ObjectSchema }

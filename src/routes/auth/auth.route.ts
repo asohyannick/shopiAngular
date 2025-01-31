@@ -27,6 +27,7 @@ import {
 } from '../../middleware/auth/auth';
 import { redirectClient, AuthenticateInstagramUser } from '../../controllers/auth/instagramAuth/instagramAuth';
 import { twitterAuth, twitterAuthentication } from '../../controllers/auth/twitterAuth/twitterAuth';
+import { linkedinAuth, linkedinCallback } from '../../controllers/auth/linkedInAuth/linkedInAuth';
 const router = express.Router();
 
 /**
@@ -535,6 +536,52 @@ router.get('/twitter/auth/register',
 router.get('/twitter/auth/callback',
     verifyThirdPartyAuthToken,
     twitterAuthentication
+);
+
+/**
+ * @swagger
+ * tags:
+ *   name: LinkedInAuth
+ *   description: LinkedIn authentication endpoints
+ */
+
+/**
+ * @swagger
+ * /api/v1/auth/linkedin/auth:
+ *   get:
+ *     summary: Initiate LinkedIn authentication
+ *     tags: [LinkedInAuth]
+ *     description: Redirects the user to LinkedIn for authentication.
+ *     responses:
+ *       302:
+ *         description: Redirected to LinkedIn for authentication.
+ *       500:
+ *         description: Internal server error due to missing environment variables.
+ */
+
+router.get('/linkedin/auth',
+    verifyThirdPartyAuthToken,
+    linkedinAuth,
+);
+
+/**
+ * @swagger
+ * /api/v1/auth/linkedin/auth/callback:
+ *   get:
+ *     summary: Handle LinkedIn authentication callback
+ *     tags: [LinkedInAuth]
+ *     description: Handles the callback from LinkedIn after the user has authenticated.
+ *     responses:
+ *       200:
+ *         description: Authentication successful, returns JWT.
+ *       400:
+ *         description: Bad request due to missing or invalid parameters.
+ *       500:
+ *         description: Internal server error during authentication process.
+ */
+router.get('/linkedin/auth/callback',
+    verifyThirdPartyAuthToken,
+    linkedinCallback,
 );
 
 export default router;

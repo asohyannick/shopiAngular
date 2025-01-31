@@ -14,6 +14,7 @@ import limiter from "./middleware/limiter/limiter";
 import { rateLimiterMiddleware } from "./middleware/limiter/rateLimiter";
 // routes
 import authRoute from "./routes/auth/auth.route";
+import aboutMeRoute from './routes/aboutMe/aboutMe.route'
 import userRoute from './routes/user/user.route';
 import productRoute from './routes/product/product.route';
 import wishListRoute from './routes/wishList/wishList.route';
@@ -26,7 +27,7 @@ import stockRoute from './routes/stock/stock.route';
 import notificationManagerRoute from './routes/notificationManager/notificationManager.route'  
 import chatRoute from './routes/chat/chat.route'
 // DB 
-import connectToDatabase from './config/connectDB';
+import databaseConfiguration from "./config/databaseConfig/databaseConfig";
 const app: Application = express();
 const port: number | string = process.env.APP_PORT || 8000;
 const csrfProtection = csurf({cookie: true});// Enable cookie based CSRF protection
@@ -71,6 +72,7 @@ app.use(rateLimiterMiddleware); // This limits a user to make only 10 requests p
 
 // Routes Registration
 app.use(`/api/${process.env.API_VERSION}/auth`, authRoute);
+app.use(`/api/${process.env.API_VERSION}/contact`, aboutMeRoute);
 app.use(`/api/${process.env.API_VERSION}/user`, userRoute);
 app.use(`/api/${process.env.API_VERSION}/product`, productRoute);
 app.use(`/api/${process.env.API_VERSION}/notify`, notificationManagerRoute);
@@ -95,7 +97,7 @@ socket.on('disconnect', () => {
 // Database Registration
 async function serve() {
   try {
-    await connectToDatabase();
+    await databaseConfiguration();
     app.listen(port, () => {
       console.log(`
         Server is owned by 
