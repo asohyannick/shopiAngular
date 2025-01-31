@@ -118,6 +118,29 @@ const contactValidationSchema = Joi.object({
         .min(10),
 });
 
+const suggestionValidationSchema = Joi.object({
+    name: Joi.string()
+        .required()
+        .trim(),
+    email: Joi.string()
+        .email()
+        .required()
+        .trim()
+        .lowercase(),
+    suggestion: Joi.string()
+        .required()
+        .trim()
+        .min(10) // Minimum length for the suggestion
+        .messages({
+            'string.min': 'Suggestion must be at least 10 characters long.',
+        }),
+    date: Joi.date().required().greater('now'),
+    status: Joi.string()
+        .valid('pending', 'reviewed', 'implemented')
+        .default('pending'), // Optional: Default status if not provided
+});
+
+
 
 
 export default {
@@ -128,4 +151,5 @@ export default {
     "/product/create-product": productValidationSchema,
     "/about-me/create-profile": profileSchema,
     "/contact-me/create-contact": contactValidationSchema,
+    "/suggestion/create-suggestion": suggestionValidationSchema
 } as { [key: string]: ObjectSchema }

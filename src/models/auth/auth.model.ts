@@ -11,23 +11,26 @@ const authSchema = new mongoose.Schema<AuthType & {cart: CartProduct[] }>({
     firstName: {
         type: String,
         required: true,
-        min: 3,
+        minlength: 3,
+        trim: true,
     },
     lastName: {
         type: String,
         required: true,
-        min: 3,
+        minlength: 3,
+        trim: true,
     },
     email: {
         type: String,
         required: true,
         unique: true,
-        max: 250,
+        trim: true,
+        lowercase: true,
     },
     password: {
         type: String,
         required: true,
-        min: 3
+        minlength: 3
     },
     isAdmin: {
     type: Boolean, 

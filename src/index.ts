@@ -29,6 +29,7 @@ import notificationManagerRoute from './routes/notificationManager/notificationM
 import chatRoute from './routes/chat/chat.route';
 import stripeRoute from './routes/payments/stripe/stripe.route';
 import paypalRoute from './routes/payments/paypal/paypal.route';
+import suggestionRoute from './routes/suggestion/suggestion.route';
 // DB 
 import databaseConfiguration from "./config/databaseConfig/databaseConfig";
 const app: Application = express();
@@ -90,6 +91,7 @@ app.use(`/api/${process.env.API_VERSION}/customer`, customerRoute);
 app.use(`/api/${process.env.API_VERSION}/chat`, chatRoute);
 app.use(`/api/${process.env.API_VERSION}/stripe-payment`, stripeRoute);
 app.use(`/api/${process.env.API_VERSION}/paypal-payment`, paypalRoute);
+app.use(`/api/${process.env.API_VERSION}/suggest`, suggestionRoute);
 
 //  Socket.IO Connection Handling
 io.on('connection', (socket) => {
