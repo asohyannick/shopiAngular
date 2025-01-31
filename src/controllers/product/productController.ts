@@ -7,6 +7,7 @@ import multer from 'multer';
 import { ReviewType } from '../../types/productType/productType';
 import mongoose from 'mongoose';
 import { ParsedQs } from 'qs';
+import compressImage from '../../utils/compressedImages/compressImage';
 
 // Define the expected structure of the Cloudinary response
 interface CloudinaryUploadResponse {
@@ -50,7 +51,6 @@ const createProduct = async (req: Request, res: Response): Promise<Response> => 
 
     try {
         const files = req.files as Express.Multer.File[]; // Get the uploaded files
-
         if (!files || files.length === 0) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: "No images provided" });
         }
@@ -59,12 +59,13 @@ const createProduct = async (req: Request, res: Response): Promise<Response> => 
 
         // Upload each file to Cloudinary
         for (const file of files) {
+            const compressedImage = await compressImage(file.buffer);
             const result = await new Promise<CloudinaryUploadResponse>((resolve, reject) => {
                 const stream = cloudinary.uploader.upload_stream((error, result) => {
                     if (error) reject(error);
                     else resolve(result as CloudinaryUploadResponse);
                 });
-                stream.end(file.buffer); // Use buffer from memory storage
+                stream.end(compressedImage); // Use buffer from memory storage
             });
 
             // Ensure the result has a secure_url
