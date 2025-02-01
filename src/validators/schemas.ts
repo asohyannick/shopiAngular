@@ -1,6 +1,7 @@
 import Joi, {  ObjectSchema } from "@hapi/joi";
 import { IBlogType } from "../types/blogType/blogType";
 import { Types } from "mongoose";
+import { IShoppingType } from "../types/shippingType/shippingType";
 const PASSWORD_REGEX = new RegExp(
     "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!.@#$%^&*])(?=.{8,})"
 );
@@ -215,6 +216,78 @@ const feedbackSchema = Joi.object({
         .allow('', null), // Allow empty messages if needed
 });
 
+const shoppingTypeSchema = Joi.object<IShoppingType>({
+    name: Joi.string()
+        .min(1)
+        .max(100)
+        .required()
+        .messages({
+            'string.base': 'Name must be a string',
+            'string.min': 'Name must be at least 1 character long',
+            'string.max': 'Name must be at most 100 characters long',
+            'any.required': 'Name is required',
+        }),
+    cost: Joi.number()
+        .positive()
+        .required()
+        .messages({
+            'number.base': 'Cost must be a number',
+            'number.positive': 'Cost must be a positive number',
+            'any.required': 'Cost is required',
+        }),
+    estimatedDeliveryTime: Joi.string()
+        .min(1)
+        .max(50)
+        .required()
+        .messages({
+            'string.base': 'Estimated delivery time must be a string',
+            'string.min': 'Estimated delivery time must be at least 1 character long',
+            'string.max': 'Estimated delivery time must be at most 50 characters long',
+            'any.required': 'Estimated delivery time is required',
+        }),
+    carrier: Joi.string()
+        .min(1)
+        .max(100)
+        .required()
+        .messages({
+            'string.base': 'Carrier must be a string',
+            'string.min': 'Carrier must be at least 1 character long',
+            'string.max': 'Carrier must be at most 100 characters long',
+            'any.required': 'Carrier is required',
+        }),
+    trackingAvailable: Joi.boolean()
+        .required()
+        .messages({
+            'boolean.base': 'Tracking available must be a boolean',
+            'any.required': 'Tracking availability is required',
+        }),
+    international: Joi.boolean()
+        .required()
+        .messages({
+            'boolean.base': 'International availability must be a boolean',
+            'any.required': 'International availability is required',
+        }),
+    maxWeightLimit: Joi.number()
+        .positive()
+        .required()
+        .messages({
+            'number.base': 'Max weight limit must be a number',
+            'number.positive': 'Max weight limit must be a positive number',
+            'any.required': 'Max weight limit is required',
+        }),
+    date: Joi.date()
+        .required()
+        .messages({
+            'date.base': 'Date must be a valid date',
+            'any.required': 'Date is required',
+        }),
+    dimensions: Joi.required().messages({
+        'object.base': 'Dimensions must be an object',
+        'any.required': 'Dimensions are required',
+    }),
+});
+
+
 
 export default {
     "/auth/register": authRegister,
@@ -227,4 +300,5 @@ export default {
     "/suggestion/create-suggestion": suggestionValidationSchema,
     "/my-blog/create-post": blogSchema,
     "/feedback/create-feedback": feedbackSchema,
+    "/shipping/create-shipping": shoppingTypeSchema,
 } as { [key: string]: ObjectSchema }
