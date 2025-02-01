@@ -94,10 +94,8 @@ const createProduct = async (req: Request, res: Response): Promise<Response> => 
             customerReviews,
             creator,
         });
-        
         await newProduct.save();
         await sendPushNotifications(res, 'New Product Alert', `Check out our new products ${newProduct.name}`);
-
         return res.status(StatusCodes.CREATED).json({
             message: "Product has been created successfully!",
             data: newProduct,
@@ -109,12 +107,19 @@ const createProduct = async (req: Request, res: Response): Promise<Response> => 
 };
 
 const fetchAllProducts = async(req:Request, res:Response): Promise<Response> => {
+    const {page = 1, limit = 12} = req.query;
     if (!req.user || !req.user.isAdmin) {
        return res.status(StatusCodes.FORBIDDEN).json({message: "You are not allowed to fetch all products"})
    }
     try {
-        const fetchProducts = await ProductModel.find();
-        return res.status(StatusCodes.OK).json({message:"Products have been fetch successfully!", fetchProducts})
+        const fetchProducts = await ProductModel.find().skip((Number(page) - 1)  *    Number(limit)).limit(Number(limit));
+        const totalImages = await ProductModel.countDocuments();
+        return res.status(StatusCodes.OK).json({
+            message:"Products have been fetch successfully!",
+            fetchProducts: Math.ceil(totalImages / Number(limit)), // Fetch Products and images lazily before presenting them to the client
+            currentPage: Number(page),
+            fetchGood: fetchProducts
+        })
     } catch (error) {
         console.log("Error occur while fetching all products from the database...", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({message: "Something went wrong"});

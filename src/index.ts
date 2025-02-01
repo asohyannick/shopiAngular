@@ -30,6 +30,7 @@ import chatRoute from './routes/chat/chat.route';
 import stripeRoute from './routes/payments/stripe/stripe.route';
 import paypalRoute from './routes/payments/paypal/paypal.route';
 import suggestionRoute from './routes/suggestion/suggestion.route';
+import blogRoute from './routes/blog/blog.route';
 // DB 
 import databaseConfiguration from "./config/databaseConfig/databaseConfig";
 const app: Application = express();
@@ -70,7 +71,10 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 
 // Security Registration
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+  credentials: true,
+}));
 app.use(limiter); // Limit the number of requests users can sent  to my  API endpoints.
 app.use(rateLimiterMiddleware); // This limits a user to make only 10 requests per second.
 
@@ -92,6 +96,7 @@ app.use(`/api/${process.env.API_VERSION}/chat`, chatRoute);
 app.use(`/api/${process.env.API_VERSION}/stripe-payment`, stripeRoute);
 app.use(`/api/${process.env.API_VERSION}/paypal-payment`, paypalRoute);
 app.use(`/api/${process.env.API_VERSION}/suggest`, suggestionRoute);
+app.use(`/api/${process.env.API_VERSION}/my-blog`, blogRoute);
 
 //  Socket.IO Connection Handling
 io.on('connection', (socket) => {

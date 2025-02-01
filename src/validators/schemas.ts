@@ -1,4 +1,6 @@
 import Joi, {  ObjectSchema } from "@hapi/joi";
+import { IBlogType } from "../types/blogType/blogType";
+import { Types } from "mongoose";
 const PASSWORD_REGEX = new RegExp(
     "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!.@#$%^&*])(?=.{8,})"
 );
@@ -140,7 +142,44 @@ const suggestionValidationSchema = Joi.object({
         .default('pending'), // Optional: Default status if not provided
 });
 
-
+const blogSchema = Joi.object<IBlogType>({
+  title: Joi.string().required().min(1).max(255).messages({
+    'string.base': 'Title must be a string',
+    'string.empty': 'Title cannot be empty',
+    'any.required': 'Title is required',
+  }),
+  content: Joi.string().required().messages({
+    'string.base': 'Content must be a string',
+    'string.empty': 'Content cannot be empty',
+    'any.required': 'Content is required',
+  }),
+  author: Joi.string().custom((value, helpers) => {
+    if (!Types.ObjectId.isValid(value)) {
+      return helpers.error('any.invalid');
+    }
+    return value;
+  }).required().messages({
+    'any.required': 'Author ID is required',
+    'any.invalid': 'Author ID must be a valid ObjectId',
+  }),
+  tags: Joi.array().items(Joi.string()).optional().messages({
+    'array.base': 'Tags must be an array of strings',
+  }),
+  date: Joi.date().optional().messages({
+    'date.base': 'Date must be a valid date',
+  }),
+  imageURLs: Joi.array().items(Joi.string().uri()).optional().messages({
+    'array.base': 'Image URLs must be an array of strings',
+    'string.uri': 'Each image URL must be a valid URI',
+  }),
+  excerpt: Joi.string().optional().max(500).messages({
+    'string.base': 'Excerpt must be a string',
+    'string.max': 'Excerpt cannot exceed 500 characters',
+  }),
+  published: Joi.string().valid('true', 'false').optional().messages({
+    'any.only': 'Published status must be either "true" or "false"',
+  }),
+});
 
 
 export default {
@@ -151,5 +190,6 @@ export default {
     "/product/create-product": productValidationSchema,
     "/about-me/create-profile": profileSchema,
     "/contact-me/create-contact": contactValidationSchema,
-    "/suggestion/create-suggestion": suggestionValidationSchema
+    "/suggestion/create-suggestion": suggestionValidationSchema,
+    "/my-blog/create-post": blogSchema
 } as { [key: string]: ObjectSchema }
