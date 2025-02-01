@@ -13,7 +13,9 @@ import {
     requestPasswordReset, 
     setNewAccountPassword,
     adminUpdateAccount,
-    googleAuth
+    googleAuth,
+    refreshAccessToken,
+    adminRefreshToken
 } from '../../controllers/auth/authController';
 import { 
     gitHubRedirect, 
@@ -62,6 +64,42 @@ router.post(
     "/register",
     schemaValidator("/auth/register"),
     registerAccount
+);
+
+/**
+ * @swagger
+ * /api/v1/auth/refresh-token:
+ *   post:
+ *     summary: Refresh access token using a refresh token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: The refresh token to obtain a new access token.
+ *     responses:
+ *       200:
+ *         description: New access token retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *       403:
+ *         description: Forbidden - Invalid refresh token or token does not match
+ *       500:
+ *         description: Internal server error
+ */
+router.post(
+    '/refresh-token', 
+    refreshAccessToken
 );
 
 /**
@@ -284,6 +322,59 @@ router.post(
     schemaValidator("/auth/admin/signup"),
     signUpAdmin
 );
+
+/**
+ * @swagger
+ * /api/v1/auth/admin/refresh-token:
+ *   post:
+ *     summary: Refresh Admin Access Token
+ *     description: This endpoint allows an admin to refresh their access token using a valid refresh token.
+ *     tags: [Admin]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: The refresh token provided by the admin for token renewal.
+ *     responses:
+ *       200:
+ *         description: Access token successfully refreshed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                   description: Newly generated access token.
+ *                 refreshToken:
+ *                   type: string
+ *                   description: Newly generated refresh token.
+ *       400:
+ *         description: Bad request, invalid refresh token or missing parameters.
+ *       401:
+ *         description: Unauthorized, invalid or expired tokens.
+ *       500:
+ *         description: Internal server error, something went wrong.
+ */
+
+router.post(
+    '/admin/refresh-token', 
+    adminRefreshToken
+);
+
+/**
+ * Admin Refresh Token Handler
+ * @function adminRefreshToken
+ * @param {Request} req - The request object containing the refresh token.
+ * @param {Response} res - The response object to send the result back to the client.
+ * @returns {void}
+ */
+
 
 /**
  * @swagger

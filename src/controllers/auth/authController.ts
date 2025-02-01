@@ -1,6 +1,6 @@
 import Auth from "../../models/auth/auth.model";
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 import nodemailer from 'nodemailer';
@@ -36,33 +36,69 @@ const registerAccount = async (req: Request, res: Response) => {
     try {
         let user = await Auth.findOne({ email });
         if (user) {
-            return res.status(StatusCodes.BAD_REQUEST).json({ message: "User already exists." });
+            // if  the user already exist, revoke the existing refresh token
+            user.refreshToken = ''; // cancel all existing refresh tokens for the previously registered user
+            await user.save();
+            return res.status(StatusCodes.BAD_REQUEST).json({
+             message: "User already exists. Existing refresh token has been cancelled" });
         }
 
         // Create a new user instance
         user = new Auth({ email, password, firstName, lastName }); // Ensure to pass all required fields
         await user.save();
 
-        // Create and sign JWT token
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET_KEY as string, { expiresIn: "1d" });
-
-        // Set cookie with the token
-        res.cookie("auth_token", token, {
+        // Create and sign access Token
+        const accessToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET_KEY as string, { expiresIn: "15m" });
+        
+        const refreshToken = jwt.sign({userId: user.id}, process.env.JWT_SECRET_KEY as string, {
+            expiresIn: "7d"
+        })
+        // save the new refresh token in the user record
+        user.refreshToken = refreshToken;
+        await user.save();
+        // Set cookie with the access token
+        res.cookie("auth_token", accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            maxAge: 86400000 // 1 day
+            maxAge: 900000 // 15 minutes 
         });
 
-        // Respond with success message
+        // Respond with success message and tokens
         return res.status(StatusCodes.CREATED).json({
+            success: true,
             message: "User has been created successfully.",
-            user
+            user,
+            accessToken,
+            refreshToken,
         });
     } catch (error) {
         console.error("Registration error:", error); // More context in error logs
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong." });
     }
 };
+
+const refreshAccessToken = async(req:Request, res:Response): Promise<Response> => {
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+        return res.status(StatusCodes.UNAUTHORIZED).json({message: "Invalid credentials"})
+    }
+ try{
+    const userPayload = jwt.verify(refreshToken, process.env.JWT_SECRET_KEY as string) as JwtPayload;
+    const user = await Auth.findById(userPayload.userId); 
+    if (!user || user.refreshToken !== refreshToken ) {
+        return res.status(StatusCodes.UNAUTHORIZED).json({message: "Invalid  refresh token"});
+    }
+
+    // create a new access token and sent it to the user
+    const accessToken = jwt.sign({userId: user.id}, process.env.JWT_SECRET_KEY as string, {
+        expiresIn: '15m'
+    })
+    return res.status(StatusCodes.OK).json({message: "New access token retrieved successfully.", accessToken});
+ } catch(error) {
+    console.error("Registration error:", error); // More context in error logs
+   return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong." });
+ }
+}
 // login into user account
 
 const loginAccount = async (req: Request, res: Response) => {
@@ -202,7 +238,11 @@ const signUpAdmin = async (req: Request, res: Response): Promise<Response> => {
         // Check if the admin already exists
         const existingAdmin = await Auth.findOne({ email });
         if (existingAdmin) {
-            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Admin already exists!" });
+            existingAdmin.refreshToken = ''; // Cancel all existing refresh token if the admin tries the register again with the  same previous credentials
+            await existingAdmin.save();
+            return res.status(StatusCodes.BAD_REQUEST).json({ 
+             message: "Admin already exists! Existing refresh token has been cancelled"
+            });
         }
         const newAdmin = new Auth({
             firstName,
@@ -213,25 +253,56 @@ const signUpAdmin = async (req: Request, res: Response): Promise<Response> => {
         });
         // Save the new admin user
         await newAdmin.save();
-        // Generate the token
-        const token = jwt.sign(
+        // Create the access token and sign in
+        const accessToken = jwt.sign(
             { id: newAdmin._id, email: newAdmin.email, isAdmin: newAdmin.isAdmin },
             process.env.SUPER_ADMIN_TOKEN as string,
-            { expiresIn: '1h' }
+            { expiresIn: '15m' }
         );
-        // Set the cookie
-        res.cookie("admin_token", token, {
+        //  Create the refresh token to be use to generate a new access token after expiration
+        const refreshToken = jwt.sign(
+            {id: newAdmin._id, email: newAdmin.email, isAdmin: newAdmin.isAdmin },
+            process.env.SUPER_ADMIN_TOKEN as string , { expiresIn: "7d"})
+        // Set the cookie,
+        res.cookie("admin_token", accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            maxAge: 86400000 // 1 day
+            maxAge: 900000 // Expire in 15 minutes
         });
 
-        return res.status(StatusCodes.CREATED).json({ message: "Admin has been created successfully." });
+        return res.status(StatusCodes.CREATED).json({ 
+            success: true,
+            message: "Admin has been created successfully." ,
+            newAdmin,
+            accessToken,
+            refreshToken,
+        });
     } catch (error) {
         console.error("Registration error:", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong." });
     }
 };
+
+const adminRefreshToken = async(req:Request, res:Response): Promise<Response> => {
+    const { refreshToken } = req.body; 
+    if (!refreshToken) {
+        return res.status(StatusCodes.UNAUTHORIZED).json({message: "Invalid credentials"})
+    }
+    try {
+      // Verify the refresh token
+       const adminPayload = jwt.verify(refreshToken, process.env.SUPER_ADMIN_TOKEN as string) as JwtPayload;
+       const adminUser = await Auth.findById(adminPayload._id);
+       if (!adminUser || refreshToken !== refreshToken) {
+         return res.status(StatusCodes.UNAUTHORIZED).json({message: "Invalid credentials"});
+        }   
+     return res.status(StatusCodes.OK).json({ message: "New access token retrieved successfully"});
+    } catch (error) {
+        console.error("Error occurred while requesting  for a refresh token as an admin ", error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong." });
+    }
+
+}
+
 
 // SignIn Admin
 
@@ -468,6 +539,8 @@ try {
 
 export {
     registerAccount,
+    refreshAccessToken,
+    adminRefreshToken,
     loginAccount,
     fetchAllAccounts,
     fetchAnAccount,

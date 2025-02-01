@@ -19,4 +19,5 @@ export interface AuthType extends Document {
     active: boolean;
     userUpdates:string[];
     fcmToken: string;
+    refreshToken:string;
 }
