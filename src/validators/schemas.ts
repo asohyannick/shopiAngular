@@ -181,6 +181,40 @@ const blogSchema = Joi.object<IBlogType>({
   }),
 });
 
+const feedbackSchema = Joi.object({
+    userId: Joi.string()
+        .custom((value, helpers) => {
+            if (!Types.ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
+        .required(),
+    firstName: Joi.string()
+        .min(1)
+        .max(50)
+        .required(),
+    lastName: Joi.string()
+        .min(1)
+        .max(50)
+        .required(),
+    email: Joi.string()
+        .email()
+        .required(),
+    feature: Joi.string()
+        .min(1)
+        .max(100)
+        .required(),
+    date: Joi.date()
+        .required(),
+    usabilityRating: Joi.string()
+        .valid('1', '2', '3', '4', '5')
+        .required(), // Assuming ratings are 1-5 as strings
+    message: Joi.string()
+        .max(500)
+        .allow('', null), // Allow empty messages if needed
+});
+
 
 export default {
     "/auth/register": authRegister,
@@ -191,5 +225,6 @@ export default {
     "/about-me/create-profile": profileSchema,
     "/contact-me/create-contact": contactValidationSchema,
     "/suggestion/create-suggestion": suggestionValidationSchema,
-    "/my-blog/create-post": blogSchema
+    "/my-blog/create-post": blogSchema,
+    "/feedback/create-feedback": feedbackSchema,
 } as { [key: string]: ObjectSchema }

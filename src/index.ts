@@ -1,5 +1,6 @@
 import express, {Request, Response, Application, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
+import trackingGoogleAnalytics from "./middleware/firebaseAnalytics/firebaseAnalytics";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import csurf from "csurf";
@@ -31,6 +32,7 @@ import stripeRoute from './routes/payments/stripe/stripe.route';
 import paypalRoute from './routes/payments/paypal/paypal.route';
 import suggestionRoute from './routes/suggestion/suggestion.route';
 import blogRoute from './routes/blog/blog.route';
+import feedbackRoute from './routes/feedback/feedback.route';
 // DB 
 import databaseConfiguration from "./config/databaseConfig/databaseConfig";
 const app: Application = express();
@@ -49,6 +51,7 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
   console.log('Morgan enabled...');
 }
+app.use(trackingGoogleAnalytics);
 // CSRF Middleware Protection
 app.use(csrfProtection); 
 // setup Swagger
@@ -97,6 +100,7 @@ app.use(`/api/${process.env.API_VERSION}/stripe-payment`, stripeRoute);
 app.use(`/api/${process.env.API_VERSION}/paypal-payment`, paypalRoute);
 app.use(`/api/${process.env.API_VERSION}/suggest`, suggestionRoute);
 app.use(`/api/${process.env.API_VERSION}/my-blog`, blogRoute);
+app.use(`/api/${process.env.API_VERSION}/feedback`,feedbackRoute);
 
 //  Socket.IO Connection Handling
 io.on('connection', (socket) => {
