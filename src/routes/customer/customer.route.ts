@@ -6,7 +6,8 @@ import {
     fetchCustomers, 
     fetchCustomer, 
     updateCustomer, 
-    deleteCustomer
+    deleteCustomer,
+    customerSupport,
 } from "../../controllers/customer/customerController";
 
 const router = express.Router();
@@ -156,4 +157,44 @@ router.delete('/remove-customer/:id',
     verifyAdminExist,
     deleteCustomer
 );
+
+/**
+ * @swagger
+ * /api/v1/customer/customer-support:
+ *   post:
+ *     summary: Submit a customer support request
+ *     tags: [Support]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *               subject:
+ *                 type: string
+ *               message:
+ *                 type: string
+ *               attachments:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *     responses:
+ *       201:
+ *         description: Support request submitted successfully
+ *       400:
+ *         description: Validation error or invalid input
+ *       401:
+ *         description: Unauthorized - Super admin token required
+ *       500:
+ *         description: Internal server error
+ */
+
+router.post('/customer-support',
+    verifySuperAdminToken,
+    customerSupport
+)
 export default router;

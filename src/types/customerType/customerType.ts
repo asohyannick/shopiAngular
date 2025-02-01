@@ -9,4 +9,6 @@ export interface ICustomerType extends Document {
    country?:string;
    address:string;
    dateOfBirth: Date;
+   message?: string;
+   subject?: string;
 } 

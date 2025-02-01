@@ -20,14 +20,14 @@ const createCustomer = async(req:Request, res:Response): Promise<Response> => {
         return res.status(StatusCodes.BAD_REQUEST).json({message: "Customer already exists."})
     }
     customer = new Customer({
-        firstName,
-        lastName,
-        email,
-        password,
-        phoneNumber,
-        country,
-        address,
-        dateOfBirth
+      firstName,
+      lastName,
+      email,
+      password,
+      phoneNumber,
+      country,
+      address,
+      dateOfBirth
     });
     await customer.save();
     // Generate the token to authenticate a customer or to be use later to login a customer
@@ -139,11 +139,33 @@ const deleteCustomer = async(req:Request, res:Response): Promise<Response> => {
   }
 }
 
+const customerSupport = async(req:Request, res:Response): Promise<Response>=> {
+  const { firstName, lastName, subject, message } = req.body;
+  try{
+    const newCustomerSupport = new Customer({
+      firstName,
+      lastName,
+      subject,
+      message
+    });
+    await newCustomerSupport.save();
+    return res.status(StatusCodes.CREATED).json({
+      success: true,
+      message: "Your message has been received successfully. We'll get back to you shortly",
+      newCustomerSupport: newCustomerSupport
+    });
+  } catch(error) {
+    console.log("Error occurred while asking for customer support", error);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({message: "Something went wrong"});
+  }
+}
+
 export {
-    createCustomer,
-    customerLogin,
-    fetchCustomers,
-    fetchCustomer,
-    updateCustomer,
-    deleteCustomer,
+  createCustomer,
+  customerLogin,
+  fetchCustomers,
+  fetchCustomer,
+  updateCustomer,
+  deleteCustomer,
+  customerSupport
 }

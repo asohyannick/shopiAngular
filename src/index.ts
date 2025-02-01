@@ -34,6 +34,7 @@ import suggestionRoute from './routes/suggestion/suggestion.route';
 import blogRoute from './routes/blog/blog.route';
 import feedbackRoute from './routes/feedback/feedback.route';
 import shippingMethodRoute from './routes/shipping/shipping.route';
+import faqRoute from './routes/faqs/faqs.route';
 // DB 
 import databaseConfiguration from "./config/databaseConfig/databaseConfig";
 const app: Application = express();
@@ -103,6 +104,8 @@ app.use(`/api/${process.env.API_VERSION}/shipping`, shippingMethodRoute);
 app.use(`/api/${process.env.API_VERSION}/suggest`, suggestionRoute);
 app.use(`/api/${process.env.API_VERSION}/my-blog`, blogRoute);
 app.use(`/api/${process.env.API_VERSION}/feedback`,feedbackRoute);
+app.use(`/api/${process.env.API_VERSION}/faq`,faqRoute);
+
 
 
 //  Socket.IO Connection Handling

@@ -35,6 +35,16 @@ const customerSchema: Schema  = new Schema<ICustomerType>({
         type:Date,
         required: true,
     },
+    message:{
+        type: String,
+        trim: true,
+        minlength: 3,
+    },
+    subject:{
+        type: String,
+       trim: true,
+       minlength: 3,
+    },
 }, {timestamps: true});
 customerSchema.pre<ICustomerType>('save', async function(next) {
     // Check if password has been modified or it's a new document
