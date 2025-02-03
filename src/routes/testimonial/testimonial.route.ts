@@ -7,6 +7,7 @@ import {
     updateTestimonial,
     removeTestimonial
 } from '../../controllers/testimonial/testimonialController';
+import schemaValidator from '../../middleware/schemaValidator/schemaValidator';
 
 const router = express.Router();
 
@@ -43,6 +44,7 @@ const router = express.Router();
  *         description: Unauthorized
  */
 router.post('/create-testimonial',
+    schemaValidator('/testimonial/create-testimonial'),
     verifyGeneralApplicationAuthenticationToken,
     createTestimonial
 );

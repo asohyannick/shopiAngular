@@ -72,6 +72,7 @@ const router = express.Router();
  *         description: Internal server error
  */
 router.post('/create-post',
+    schemaValidator('/my-blog/create-post'),
     verifySuperAdminToken,
     verifyAdminExist,
     uploadImages,
@@ -149,7 +150,6 @@ router.post('/subscribe',
  *         description: Internal server error
  */
 router.get('/fetch-blogs',
-    schemaValidator('/my-blog/create-post'),
     verifySuperAdminToken,
     verifyAdminExist,
     fetchBlogs

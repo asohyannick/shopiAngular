@@ -5,6 +5,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import notFoundMiddleware from "./middleware/404Handler/404Handler";
 import errorHandlerMiddleware from "./middleware/errorHandler/errorHandler";
+import trackIncomingRequest from "./middleware/timerMiddleware/timerMiddleware";
 import csurf from "csurf";
 import { Server } from 'socket.io';
 import { SetSocketIO } from "./controllers/chat/chatController";
@@ -54,6 +55,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
+app.use(trackIncomingRequest);
 app.use(cookieParser()); // Cookie parser middleware to parse cookie
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));

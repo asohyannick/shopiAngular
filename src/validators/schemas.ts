@@ -2,6 +2,7 @@ import Joi, {  ObjectSchema } from "@hapi/joi";
 import { IBlogType } from "../types/blogType/blogType";
 import { Types } from "mongoose";
 import { IShoppingType } from "../types/shippingType/shippingType";
+import { ITestimonailStatus } from '../types/testimonialType/testimonialType';
 const PASSWORD_REGEX = new RegExp(
     "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!.@#$%^&*])(?=.{8,})"
 );
@@ -287,6 +288,22 @@ const shoppingTypeSchema = Joi.object<IShoppingType>({
     }),
 });
 
+const testimonialValidationSchema = Joi.object({
+    userId: Joi.string().custom((value, helpers) => {
+        if (!Types.ObjectId.isValid(value)) {
+            return helpers.error('any.invalid');
+        }
+        return value;
+    }).required(),
+    profileImage: Joi.string().uri().required(),
+    name: Joi.string().min(1).max(100).required(),
+    title: Joi.string().min(1).max(100).required(),
+    message: Joi.string().min(1).required(),
+    status: Joi.string().valid(...Object.values(ITestimonailStatus)).required(),
+    continent: Joi.string().valid('Africa', 'Asia', 'Europe', 'North America', 'South America', 'Australia', 'Antarctica').required(),
+    date: Joi.date().required(),
+    rating: Joi.number().min(1).max(5).required()
+});
 
 
 export default {
@@ -301,4 +318,5 @@ export default {
     "/my-blog/create-post": blogSchema,
     "/feedback/create-feedback": feedbackSchema,
     "/shipping/create-shipping": shoppingTypeSchema,
+    "/testimonial/create-testimonial": testimonialValidationSchema,
 } as { [key: string]: ObjectSchema }
