@@ -3,6 +3,8 @@ import { StatusCodes } from "http-status-codes";
 import trackingGoogleAnalytics from "./middleware/firebaseAnalytics/firebaseAnalytics";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import notFoundMiddleware from "./middleware/404Handler/404Handler";
+import errorHandlerMiddleware from "./middleware/errorHandler/errorHandler";
 import csurf from "csurf";
 import { Server } from 'socket.io';
 import { SetSocketIO } from "./controllers/chat/chatController";
@@ -35,6 +37,8 @@ import blogRoute from './routes/blog/blog.route';
 import feedbackRoute from './routes/feedback/feedback.route';
 import shippingMethodRoute from './routes/shipping/shipping.route';
 import faqRoute from './routes/faqs/faqs.route';
+import testimonialRoute from './routes/testimonial/testimonial.route';
+
 // DB 
 import databaseConfiguration from "./config/databaseConfig/databaseConfig";
 const app: Application = express();
@@ -48,6 +52,8 @@ SetSocketIO(io);
 // Middleware Registration
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
 app.use(cookieParser()); // Cookie parser middleware to parse cookie
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -105,6 +111,7 @@ app.use(`/api/${process.env.API_VERSION}/suggest`, suggestionRoute);
 app.use(`/api/${process.env.API_VERSION}/my-blog`, blogRoute);
 app.use(`/api/${process.env.API_VERSION}/feedback`,feedbackRoute);
 app.use(`/api/${process.env.API_VERSION}/faq`,faqRoute);
+app.use(`/api/${process.env.API_VERSION}/testimonial`, testimonialRoute);
 
 
 
