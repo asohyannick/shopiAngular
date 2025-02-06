@@ -48,7 +48,11 @@ const createWishList = async(req:Request, res:Response): Promise<Response> => {
         await newWishList.save();
         // Update the user's wishlists Array
         await Auth.findByIdAndUpdate(userId, {$push: {wishlists: newWishList._id}});
-        return res.status(StatusCodes.CREATED).json({message: "Wishlist has been created successfully.", newWishList})
+        return res.status(StatusCodes.CREATED).json({
+            success: true,
+            message: "Wishlist has been created successfully.", 
+            newWishList
+        });
     } catch (error) {
         console.error("Error occurred while creating a wishlist", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });  
@@ -59,7 +63,10 @@ const fetchUserWishLists = async(req:Request, res:Response): Promise<Response> =
     const { userId } = req.params;
    try {
       const wishLists = await WishListModel.find({ userId }).populate('products');
-      return res.status(StatusCodes.CREATED).json({message: "Wishlists has been fetched successfully", wishList: wishLists})
+      return res.status(StatusCodes.CREATED).json({
+        message: "Wishlists has been fetched successfully", 
+        wishList: wishLists
+    });
    } catch (error) {
     console.error("Error occurred while fetching  wishlists", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });
@@ -73,7 +80,10 @@ const fetchUserWishList = async(req: Request, res:Response): Promise<Response> =
        if (!wishlist) {
           return res.status(StatusCodes.NOT_FOUND).json({message: "Wishlist not found" });
        }
-       return res.status(StatusCodes.OK).json({message: "Wishlist has been fetched successfully.", wishlist })
+       return res.status(StatusCodes.OK).json({
+        message: "Wishlist has been fetched successfully.", 
+        wishlist
+    });
     } catch (error) {
       console.error("Error occurred while fetching  wishlist", error);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });     
@@ -100,7 +110,10 @@ const updateWishList = async(req:Request, res:Response): Promise<Response> => {
             wishlist.products = wishlist.products.filter(id => !productIdsToRemove.includes(id.toString()));
         }
         await wishlist.save();
-        return res.status(StatusCodes.OK).json({message: "Wishlist has been updated successfully!", wishlist});
+        return res.status(StatusCodes.OK).json({
+            message: "Wishlist has been updated successfully!", 
+            wishlist
+        });
     } catch (error) {
       console.error("Error occurred while updating  wishlist", error);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });     
@@ -115,7 +128,10 @@ const deleteWishList = async(req:Request, res:Response): Promise<Response> => {
             return res.status(StatusCodes.NOT_FOUND).json({message: "Wishlist not found!"});
         }
         await Auth.findByIdAndUpdate(userId, {$pull: {wishlists: wishlistId }});
-     return res.status(StatusCodes.OK).json({message: "Wishlist has been deleted successfully!"})
+     return res.status(StatusCodes.OK).json({
+        message: "Wishlist has been deleted successfully!",
+        removeWishlist
+    })
     } catch (error) {
         console.error("Error occurred while deleting  wishlist", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });     
@@ -127,7 +143,8 @@ const shareWishlist = async(req:Request, res:Response): Promise<Response> => {
     try {
         const wishlist = await WishListModel.findById(wishlistId);
         if (!wishlist || wishlist.userId.toString() !== userId) {
-         return res.status(StatusCodes.NOT_FOUND).json({message: "Wishlist not found or user not authorized"});   
+         return res.status(StatusCodes.NOT_FOUND).json({
+            message: "Wishlist not found or user not authorized"});   
         }
         // Add the user to the sharedWith list
         if (!wishlist.sharedWith.includes(userIdToShare)) {
@@ -135,7 +152,10 @@ const shareWishlist = async(req:Request, res:Response): Promise<Response> => {
             await wishlist.save();
             
         }
-        return res.status(StatusCodes.OK).json({message: "Wishlist has been shared successfully", wishlist});
+        return res.status(StatusCodes.OK).json({
+            message: "Wishlist has been shared successfully", 
+            wishlist
+        });
     } catch (error) {
         console.error("Error occurred while sharing  wishlist", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });     
@@ -210,7 +230,10 @@ const searchWishlists = async(req:Request, res:Response): Promise<Response> => {
     }
     try {
         const wishlists = await WishListModel.find(query).populate('products');
-        return res.status(StatusCodes.OK).json({wishlists}); 
+        return res.status(StatusCodes.OK).json({
+            message:"Search list have been fetched successfully", 
+            wishlists
+        }); 
     } catch (error) {
         console.error("Error occurred while searching  wishlist", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });     

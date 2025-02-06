@@ -32,7 +32,11 @@ const createStock = async(req:Request, res:Response): Promise<Response> => {
             supplier
         });
         await newStock.save();
-        return res.status(StatusCodes.CREATED).json({message: "New stock has been created successfully"})
+        return res.status(StatusCodes.CREATED).json({
+            success:true,
+            message: "New stock has been created successfully",
+            stockStatus
+        });
     } catch (error) {
         console.error("Error occurred while creating stock", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });  
@@ -63,7 +67,7 @@ const fetchStock = async(req:Request, res:Response): Promise<Response> => {
         if (!stock) {
             return res.status(StatusCodes.NOT_FOUND).json({message: "Stock not found"});
         } 
-        return res.status(StatusCodes.OK).json({message: "Stock has been fetched successfully"});
+        return res.status(StatusCodes.OK).json({message: "Stock has been fetched successfully", stock});
     } catch (error) {
         console.error("Error occurred while fetching stock", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" })
@@ -110,7 +114,7 @@ const removeStock = async(req:Request, res:Response): Promise<Response> => {
         if (!stock) {
             return res.status(StatusCodes.NOT_FOUND).json({message: "Stock not found"})
         }
-        return res.status(StatusCodes.OK).json({message: "Stock has been deleted successfully."});
+        return res.status(StatusCodes.OK).json({message: "Stock has been deleted successfully.", stock});
     } catch (error) {
         console.error("Error occurred while deleting stock", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" })

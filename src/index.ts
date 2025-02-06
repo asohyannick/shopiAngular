@@ -16,7 +16,6 @@ import helmet from 'helmet';
 import cors from 'cors';
 import limiter from "./middleware/limiter/limiter";
 import { rateLimiterMiddleware } from "./middleware/limiter/rateLimiter";
-// routes
 import authRoute from "./routes/auth/auth.route";
 import aboutMeRoute from './routes/aboutMe/aboutMe.route';
 import contactMeRoute from './routes/contactMe/contactMe.route';
@@ -39,59 +38,29 @@ import feedbackRoute from './routes/feedback/feedback.route';
 import shippingMethodRoute from './routes/shipping/shipping.route';
 import faqRoute from './routes/faqs/faqs.route';
 import testimonialRoute from './routes/testimonial/testimonial.route';
-
-// DB 
 import databaseConfiguration from "./config/databaseConfig/databaseConfig";
 const app: Application = express();
-const port: number | string = process.env.APP_PORT || 8000;
-const csrfProtection = csurf({cookie: true});// Enable cookie based CSRF protection
-// Create HTTP server
+const port: number | string = process.env.APP_PORT as string | number || 8000;
+const csrfProtection = csurf({cookie: true});
 const server = http.createServer(app);
-// Initialize Socket.IO
 const io = new Server(server);
-SetSocketIO(io);
-// Middleware Registration
+SetSocketIO(io)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(notFoundMiddleware);
-app.use(errorHandlerMiddleware);
-app.use(trackIncomingRequest);
-app.use(cookieParser()); // Cookie parser middleware to parse cookie
-if (process.env.NODE_ENV === 'development') {
+app.use(cookieParser());
+if (process.env.NODE_ENV as string === 'development') {
   app.use(morgan('dev'));
   console.log('Morgan enabled...');
 }
-app.use(trackingGoogleAnalytics);
-// CSRF Middleware Protection
-app.use(csrfProtection); 
-// setup Swagger
 setupSwagger(app);
-
-// Middleware to create and send CSRF token
-app.use((req: Request, res: Response, next: NextFunction) => {
-    res.cookie('XSRF-TOKEN', req.csrfToken()); // Set CSRF token in a cookie
-    next();
-});
-
-// Middleware to handle CSRF token errors
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-    if (err.code === 'EBADCSRF') {
-        return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid CSRF token." });
-        // Fixed missing parenthesis
-    }
-    next(err);
-});
-
-// Security Registration
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: process.env.FRONTEND_URL as string,
   credentials: true,
 }));
-app.use(limiter); // Limit the number of requests users can sent  to my  API endpoints.
-app.use(rateLimiterMiddleware); // This limits a user to make only 10 requests per second.
 
-// Routes Registration
+app.use(limiter);
+app.use(rateLimiterMiddleware);
 app.use(`/api/${process.env.API_VERSION}/auth`, authRoute);
 app.use(`/api/${process.env.API_VERSION}/about-me`, aboutMeRoute);
 app.use(`/api/${process.env.API_VERSION}/contact-me`, contactMeRoute);
@@ -114,34 +83,41 @@ app.use(`/api/${process.env.API_VERSION}/my-blog`, blogRoute);
 app.use(`/api/${process.env.API_VERSION}/feedback`,feedbackRoute);
 app.use(`/api/${process.env.API_VERSION}/faq`,faqRoute);
 app.use(`/api/${process.env.API_VERSION}/testimonial`, testimonialRoute);
-
-
-
-//  Socket.IO Connection Handling
+app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
+app.use(trackIncomingRequest);
+app.use(trackingGoogleAnalytics);
+app.use(csrfProtection); 
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.cookie(process.env.XSRF_TOKEN as string, req.csrfToken());
+  next();
+});
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    if (err.code === process.env.CSRF_TOKEN as string) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid CSRF token." });
+    }
+    next(err);
+});
 io.on('connection', (socket) => {
 console.log('A user connected', socket.id);
-// Handle discount
 socket.on('disconnect', () => {
   console.log('User disconnected', socket.id);
 });
 }); 
-
-// Database Registration
 async function serve() {
   try {
     await databaseConfiguration();
     app.listen(port, () => {
       console.log(`
         Server is owned by 
-        ${process.env.APP_NAME} 
-        running on ${process.env.APP_HOST}
-        ${process.env.APP_PORT} on 
-      api/${process.env.API_VERSION}`);
+        ${process.env.APP_NAME as string} 
+        running on ${process.env.APP_HOST as string | number}
+        ${process.env.APP_PORT as string | number} on 
+      api/${process.env.API_VERSION as string | number}`);
     });
   } catch (error) {
-    console.log("Error occur running the server", error);
+    console.log("Error occur running the server", error );
   }
 }
 serve();
-
 export { io } 

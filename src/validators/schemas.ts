@@ -3,6 +3,7 @@ import { IBlogType } from "../types/blogType/blogType";
 import { Types } from "mongoose";
 import { IShoppingType } from "../types/shippingType/shippingType";
 import { ITestimonailStatus } from '../types/testimonialType/testimonialType';
+import { ICustomerType } from "../types/customerType/customerType";
 const PASSWORD_REGEX = new RegExp(
     "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!.@#$%^&*])(?=.{8,})"
 );
@@ -43,9 +44,7 @@ const productValidationSchema = Joi.object({
     rating: Joi.number().min(0).max(5).required(), // Assuming a rating scale of 0 to 5
     posted_Date: Joi.date().required(),
     brand: Joi.string().required(),
-    images: Joi.array().items(Joi.string().uri()).default([
-        "https://cdn.mos.cms.futurecdn.net/Ajc3ezCTN4FGz2vF4LpQn9-1200-80.jpg"
-    ]),
+    imageURLs: Joi.array().items(Joi.string().uri()).optional(),
     specifications: Joi.string().required(),
     duration: Joi.number().integer().min(0).required(),
     isFeatured: Joi.boolean().required(),
@@ -65,7 +64,7 @@ const productValidationSchema = Joi.object({
         rating: Joi.number().min(0).max(5).required(), // Assuming a rating scale of 0 to 5
         reviewDate: Joi.date().required(),
     })).optional(),    // Optional, in case there are no reviews initially
-    creator: Joi.string().required(),
+    producers: Joi.array().items(Joi.string()).required(),
 });
 
 
@@ -111,8 +110,11 @@ const contactValidationSchema = Joi.object({
         .lowercase(),
     phone: Joi.string()
         .optional()
-        .pattern(/^(?:\+\d{1,3})?\d{10}$/, { name: 'phone' }), // Optional phone validation
-    date: Joi.date().required().greater('now'), // Ensure the date is in the future
+        .pattern(/^(?:\+\d{1,3})?\d{10}$/, { name: 'phone' }) // Optional phone validation
+        .message('Phone number must be in the format: +<country code> followed by 10 digits or just 10 digits'),
+    date: Joi.date()
+        .required()
+        .greater('now'), // Ensure the date is in the future
     subject: Joi.string()
         .required()
         .trim(),
@@ -121,6 +123,7 @@ const contactValidationSchema = Joi.object({
         .trim()
         .min(10),
 });
+
 
 const suggestionValidationSchema = Joi.object({
     name: Joi.string()
@@ -305,6 +308,22 @@ const testimonialValidationSchema = Joi.object({
     rating: Joi.number().min(1).max(5).required()
 });
 
+const customerValidationSchema = Joi.object<ICustomerType>({
+    userId: Joi.string().optional(), // Assuming userId is a string representation of ObjectId
+    firstName: Joi.string().required().trim(),
+    lastName: Joi.string().required().trim(),
+    email: Joi.string().email().required().trim().lowercase(),
+    password: Joi.string().required().min(6), // Minimum password length
+    phoneNumber: Joi.number().required().integer().min(1000000000).max(9999999999) // Assuming a 10-digit phone number
+        .message('Phone number must be a 10-digit number'),
+    country: Joi.string().optional().trim(),
+    address: Joi.string().required().trim(),
+    dateOfBirth: Joi.date().required().greater('1-1-1900'), // Ensure a realistic date
+    message: Joi.string().optional().trim().min(10),
+    subject: Joi.string().optional().trim(),
+});
+
+
 
 export default {
     "/auth/register": authRegister,
@@ -319,4 +338,5 @@ export default {
     "/feedback/create-feedback": feedbackSchema,
     "/shipping/create-shipping": shoppingTypeSchema,
     "/testimonial/create-testimonial": testimonialValidationSchema,
+    "/customer/create-customer": customerValidationSchema,
 } as { [key: string]: ObjectSchema }

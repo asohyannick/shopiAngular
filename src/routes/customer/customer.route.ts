@@ -9,6 +9,7 @@ import {
     deleteCustomer,
     customerSupport,
 } from "../../controllers/customer/customerController";
+import schemaValidator from '../../middleware/schemaValidator/schemaValidator';
 
 const router = express.Router();
 /**
@@ -27,6 +28,7 @@ const router = express.Router();
  *         description: Internal server error. Unable to create customer account.
  */
 router.post('/create-customer',
+    schemaValidator('/customer/create-customer'),
     verifySuperAdminToken,
     verifyAdminExist,
     createCustomer

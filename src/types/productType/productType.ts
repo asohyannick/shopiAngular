@@ -34,5 +34,6 @@ warrantyPeriod: string;  // Duration of warranty
 returnPolicy: string;    // Description of the return policy
 tags: string[];          // Array of tags for better searchability
 customerReviews: ReviewType[]       // Object to hold customer reviews    
-creator:string[];
+producers:string[];
+lastUpdated: Date;
 }

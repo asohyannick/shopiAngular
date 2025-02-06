@@ -6,7 +6,7 @@ import {
     updateProfile, 
     removeProfile
 } from '../../controllers/aboutMe/aboutMeController';
-import { verifyGeneralApplicationAuthenticationToken } from '../../middleware/auth/auth';
+import { verifyGeneralApplicationAuthenticationToken} from '../../middleware/auth/auth';
 import schemaValidator from '../../middleware/schemaValidator/schemaValidator';
 
 const router = express.Router();
@@ -162,7 +162,7 @@ router.post('/create-profile',
  *         description: Internal server error.
  */
 router.get('/fetch-profiles',
-    verifyGeneralApplicationAuthenticationToken,
+   verifyGeneralApplicationAuthenticationToken,
     fetchProfiles,
 );
 
@@ -253,7 +253,7 @@ router.get('/fetch-profile/:id',
  *         description: Internal server error.
  */
 router.put('/update-profile/:id',
-    verifyGeneralApplicationAuthenticationToken,
+   verifyGeneralApplicationAuthenticationToken,
     updateProfile,
 );
 

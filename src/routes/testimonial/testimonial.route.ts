@@ -2,6 +2,7 @@ import express from 'express';
 import { verifyGeneralApplicationAuthenticationToken } from '../../middleware/auth/auth';
 import { 
     createTestimonial, 
+    uploadImages,
     fetchTestimonial, 
     fetchTestimonials,
     updateTestimonial,
@@ -46,6 +47,7 @@ const router = express.Router();
 router.post('/create-testimonial',
     schemaValidator('/testimonial/create-testimonial'),
     verifyGeneralApplicationAuthenticationToken,
+    uploadImages,
     createTestimonial
 );
 

@@ -4,36 +4,37 @@ import bcrypt from 'bcryptjs';
 const customerSchema: Schema  = new Schema<ICustomerType>({
     firstName:{
         type:String,
+        trim: true,
         required: true,
     },
     lastName:{
         type:String,
+        trim: true,
         required: true,
     },
     email:{
         type: String,
         required: true,
-        unique: true,
+        trim: true,
+        lowercase: true,
     },
     password:{
         type:String,
-        required:  true,
+        required: true,
     },
     phoneNumber:{
         type:Number,
-        required: true,
     },
     country:{
         type:String,
-        required: true,
+        trim: true,
     },
     address:{
         type:String,
-        required: true,
+        trim: true,
     },
     dateOfBirth:{
         type:Date,
-        required: true,
     },
     message:{
         type: String,

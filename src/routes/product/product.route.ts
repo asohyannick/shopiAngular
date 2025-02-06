@@ -6,7 +6,7 @@ import {
 } from '../../middleware/auth/auth';
 import { 
     createProduct, 
-    uploadImages,
+    // uploadProductImages,
     fetchAllProducts, 
     fetchProduct, 
     updateProduct, 
@@ -40,7 +40,7 @@ router.post('/create-product',
     verifySuperAdminToken,
     verifyAdminExist,
     schemaValidator('/product/create-product'),
-    uploadImages,
+    // uploadProductImages,
     createProduct
 );
 

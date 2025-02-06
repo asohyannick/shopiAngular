@@ -77,7 +77,7 @@ const removeChat = async(req:Request, res:Response): Promise<Response> => {
    // Emit the chat deleted event
     io.emit('chatDeleted', chat);
    await sendPushNotifications(res, 'Hello', `You have deleted this chat:  ${chat}`);
-  return res.status(StatusCodes.OK).json({message: "Chat has been updated successfully", chat})
+   return res.status(StatusCodes.OK).json({message: "Chat has been updated successfully", chat})
  } catch (error) {
     console.log("Error occur while removing a chat", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({message: "Something went wrong"});

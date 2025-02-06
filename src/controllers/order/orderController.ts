@@ -125,7 +125,7 @@ const orderHistory = async(req:Request, res:Response): Promise<Response> => {
         return res.status(StatusCodes.NOT_FOUND).json({message: "Order not found"});
     }
     const orderHistory = await OrderHistory.find({orderId: order._id});
-    return res.status(StatusCodes.OK).json({orderHistory});
+    return res.status(StatusCodes.OK).json({message: "Order history has been fetched successfully.", orderHistory});
   } catch (error) {
     console.error("Error occurred while fetching an order", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" }); 
@@ -140,7 +140,7 @@ const deleteOrderHistory = async(req:Request, res:Response): Promise<Response> =
       return res.status(StatusCodes.NOT_FOUND).json({message: "Order history not found."});
     }
     await OrderHistory.findByIdAndDelete(historyId);
-    return res.status(StatusCodes.OK).json({message: "Order history has been deleted successfully."});
+    return res.status(StatusCodes.OK).json({message: "Order history has been deleted successfully.", historyRecord});
   } catch (error) {
     console.error("Error occurred while deleting an order", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" }); 

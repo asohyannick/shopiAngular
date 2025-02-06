@@ -14,7 +14,11 @@ const createContact = async(req:Request, res:Response): Promise<Response> => {
         message
     });
     await newContact.save();
-    return res.status(StatusCodes.CREATED).json({message: "Your message has been sent successfully! We will get back to you shortly."});
+    return res.status(StatusCodes.CREATED).json({
+        success: true,
+        message: "Your message has been sent successfully! We will get back to you shortly.",
+       newContact
+    });
  } catch (error) {
     console.error("Error occurred while creating a contact", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });

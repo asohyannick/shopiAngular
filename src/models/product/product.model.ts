@@ -112,10 +112,14 @@ reviewDate:{
     required: true,
 }
 }],
-creator:[{
+producers:{
     type:[String],
     required: true,
-}],
+},
+lastUpdated:{
+    type:Date,
+    default: Date.now,
+},
 }, {timestamps: true});
 
 const ProductModel = mongoose.model('Product', productSchema);

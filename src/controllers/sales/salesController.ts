@@ -7,7 +7,11 @@ import { ParsedQs } from 'qs';
 const createSale = async(req:Request, res:Response):Promise<Response> => {
  try {
     const newSale = await Sale.create(req.body);
-    return res.status(StatusCodes.CREATED).json({message: "Sales report has been created successfully", newSale});
+    return res.status(StatusCodes.CREATED).json({
+        success: true,
+        message: "Sales report has been created successfully", 
+        newSale
+    });
  } catch (error) {
     console.error("Error occurred while creating a sale report", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });  
@@ -17,7 +21,10 @@ const createSale = async(req:Request, res:Response):Promise<Response> => {
 const fetchSales = async(req:Request, res:Response): Promise<Response> => {
    try {
      const sales = await Sale.find();
-     return res.status(StatusCodes.OK).json({message:"All sales have been successfully fetched from the database", sales});
+     return res.status(StatusCodes.OK).json({
+        message:"All sales have been successfully fetched from the database",
+        sales
+    });
    } catch (error) {
     console.error("Error occurred while fetching  sales reports", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" }); 
@@ -31,7 +38,9 @@ const fetchSale = async(req: Request, res:Response) => {
         if (!retrieveSale) {
             return res.status(StatusCodes.NOT_FOUND).json({message: "Sale not found"});
         }
-        return res.status(StatusCodes.OK).json({message: "Sale has been fetched successfully.", retrieveSale});
+        return res.status(StatusCodes.OK).json({
+            message: "Sale has been fetched successfully.", 
+            retrieveSale});
     } catch (error) {
         console.error("Error occurred while fetching  sale report", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" }); 
@@ -48,7 +57,10 @@ try {
           sale: newSales
         })
     }
-    return res.status(StatusCodes.OK).json({message: "Sale has been updated successfully"});
+    return res.status(StatusCodes.OK).json({
+        message: "Sale has been updated successfully",
+        newSales
+    });
 } catch (error) {
     console.error("Error occurred while updating  sale's report", error);
    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" }); 
@@ -61,7 +73,10 @@ const deleteSale = async(req:Request, res:Response): Promise<Response> => {
     if (!sale) {
         return res.status(StatusCodes.NOT_FOUND).json({message: "Sale not found"});
     } 
-    return res.status(StatusCodes.OK).json({message: "Sale has been deleted successfully.", sale});
+    return res.status(StatusCodes.OK).json({
+        message: "Sale has been deleted successfully.",
+        sale
+    });
   } catch (error) {
     console.error("Error occurred while deleting a sale report", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });  
@@ -98,7 +113,10 @@ const totalSales = async(req:Request<{}, {}, {}, {startDate?:string, endDate?: s
         const pdfBuffer = generatePDF([{ totalSales: totalSales[0]?.totalSales || 0 }], 'Total Sales Report');
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=total_sales_report.pdf');
-        return res.status(StatusCodes.OK).send({message: "Total sales has been fetch successfully.", pdfBuffer});
+        return res.status(StatusCodes.OK).send({
+            message: "Total sales has been fetch successfully.",        
+            pdfBuffer
+        });
     } catch (error) {
         console.error('Error generating total sales PDF:', error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
@@ -154,7 +172,10 @@ const salesByProduct = async(req: Request<{}, {}, {}, {startDate?: string, endDa
         const pdfBuffer = generatePDF(salesByProduct, 'Sales by Product Report');
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=sales_by_product_report.pdf');
-        return res.status(StatusCodes.OK).send({message: "Sales by product has been generated successfully", pdfBuffer}); // Success status
+        return res.status(StatusCodes.OK).send({
+            message: "Sales by product has been generated successfully", 
+            pdfBuffer
+        }); // Success status
     } catch (error) {
         console.error('Error generating sales by product PDF:', error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
@@ -334,7 +355,10 @@ const topSellingProduct = async(req:Request, res:Response): Promise<Response> =>
         const pdfBuffer = generatePDF(topProducts, 'Top Selling Products Report');
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=top_selling_products_report.pdf');
-        return res.status(StatusCodes.OK).send({message:"Generated top selling products in PDF successfully.", pdfBuffer}); // Success status
+        return res.status(StatusCodes.OK).send({
+            message:"Generated top selling products in PDF successfully.", 
+            pdfBuffer
+        }); // Success status
     } catch (error) {
         console.error('Error generating top selling products PDF:', error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message:'Something went wrong.'});

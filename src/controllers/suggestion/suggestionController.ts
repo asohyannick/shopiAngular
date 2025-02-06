@@ -18,8 +18,8 @@ const createSuggestion = async(req: Request, res:Response): Promise<Response> =>
     });
     await newSuggestion.save();
     return res.status(StatusCodes.CREATED).json({
-        message: "Your suggestion has been submitted successfully.", 
-        suggestion: newSuggestion
+      message: "Your suggestion has been submitted successfully.", 
+      suggestion: newSuggestion
     });
  } catch (error) {
     console.error("Error occurred while creating a suggestion message", error);
@@ -31,8 +31,8 @@ const fetchSuggestions = async(req:Request, res:Response): Promise<Response> => 
   try {
     const suggestions = await Suggestion.find();
     return res.status(StatusCodes.OK).json({
-        message: "Suggestions has been fetched successfully",
-        suggestion: suggestions
+      message: "Suggestions has been fetched successfully",
+      suggestion: suggestions
     }); 
   } catch (error) {
     console.error("Error occurred while creating a suggestion message", error);
@@ -77,7 +77,7 @@ const removeSuggestion = async(req:Request, res:Response): Promise<Response> => 
     if(!suggestion) {
       return res.status(StatusCodes.NOT_FOUND).json({message: "Suggestion not found!"});
     }
-    return res.status(StatusCodes.OK).json({message: "Suggestion has been deleted successfully."})
+    return res.status(StatusCodes.OK).json({message: "Suggestion has been deleted successfully.", suggestion})
   } catch (error) {
     console.error("Error occurred while creating a suggestion message", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });

@@ -72,7 +72,6 @@ const authSchema = new mongoose.Schema<AuthType & {cart: CartProduct[] }>({
     }],
     fcmToken:{
         type:String,
-        required: true,
     },
     refreshToken:{
         type:String,

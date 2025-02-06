@@ -101,7 +101,7 @@ const fetchCustomer = async(req:Request, res:Response): Promise<Response> => {
     if (!retrieveCustomer) {
         return res.status(StatusCodes.NOT_FOUND).json({message: "Customer does not exist"});
     }
-    return res.status(StatusCodes.OK).json({message: "Customer has been fetched successfully"});
+    return res.status(StatusCodes.OK).json({message: "Customer has been fetched successfully", retrieveCustomer});
   } catch (error) {
     console.error("Error occurred while fetching a customer", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" }); 
@@ -140,11 +140,13 @@ const deleteCustomer = async(req:Request, res:Response): Promise<Response> => {
 }
 
 const customerSupport = async(req:Request, res:Response): Promise<Response>=> {
-  const { firstName, lastName, subject, message } = req.body;
+  const { firstName, lastName, email, password, subject, message } = req.body;
   try{
     const newCustomerSupport = new Customer({
       firstName,
       lastName,
+      email,
+      password,
       subject,
       message
     });

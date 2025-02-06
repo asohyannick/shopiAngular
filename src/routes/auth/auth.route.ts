@@ -32,6 +32,7 @@ import { twitterAuth, twitterAuthentication } from '../../controllers/auth/twitt
 import { linkedinAuth, linkedinCallback } from '../../controllers/auth/linkedInAuth/linkedInAuth';
 const router = express.Router();
 
+// General Authentication Route
 /**
  * @swagger
  * /api/v1/auth/register:
@@ -430,7 +431,7 @@ router.post(
  *       500:
  *         description: Internal server error. Unable to update account.
  */
-router.put('/admin/update-account',
+router.put('/admin/update-account/:id',
     adminUpdateAccount // Test this API endpoint before marking it as DONE.
 );
 

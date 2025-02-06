@@ -63,7 +63,7 @@ try {
     if(!profile) {
         return res.status(StatusCodes.NOT_FOUND).json({message: "Profile not found"});
     }
-    return res.status(StatusCodes.OK).json({message: "Profile has been updated successfully."});
+    return res.status(StatusCodes.OK).json({message: "Profile has been updated successfully.", profile});
 } catch (error) {
     console.log("Error occur while updating a profile", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({message: "Something went wrong"});

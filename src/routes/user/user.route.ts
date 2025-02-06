@@ -41,7 +41,7 @@ router.get('/all-users',
 
 /**
  * @swagger
- * /api/v1/user/users/{id}:
+ * /api/v1/user/user/{id}:
  *   get:
  *     summary: Admin should be able to fetch a user in our database if authenticated
  *     responses:
@@ -50,7 +50,7 @@ router.get('/all-users',
  *       400:
  *         description: Bad request
  */
-router.get('/users/:id',
+router.get('/user/:id',
     verifySuperAdminToken,
     verifyAdminExist,
     fetchAUser
@@ -67,7 +67,7 @@ router.get('/users/:id',
  *       400:
  *         description: Bad request
  */
-router.put('/update-users/:id',
+router.put('/update-user/:id',
     verifySuperAdminToken,
     verifyAdminExist,
     updateAUser
@@ -84,7 +84,7 @@ router.put('/update-users/:id',
  *       400:
  *         description: Bad request
  */
-router.delete('/delete-users/:id',
+router.delete('/delete-user/:id',
     verifySuperAdminToken,
     verifyAdminExist,
     deleteAUser
@@ -101,7 +101,7 @@ router.delete('/delete-users/:id',
  *       400:
  *         description: Bad request
  */
-router.put('/activate-account/:userId/status',
+router.put('/activate-account/:id/status',
     verifySuperAdminToken,
     verifyAdminExist,
     activateUserAccount
@@ -112,11 +112,20 @@ router.put('/activate-account/:userId/status',
  * /api/v1/user/search-user:
  *   get:
  *     summary: Admin should be able to search for users in our database if authenticated
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         required: true
+ *         description: Search term to filter users by first name, last name, or email.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: Admin should be able to search for users in our database if authenticated
+ *         description: Users fetched successfully
  *       400:
- *         description: Bad request
+ *         description: Bad request - query parameter must be a string
+ *       500:
+ *         description: Internal server error
  */
 router.get('/search-user',
     verifySuperAdminToken,
@@ -169,7 +178,7 @@ router.get('/fetch-users/logs',
  *       400:
  *         description: Bad request
  */
-router.get('/fetch-users/log/:id',
+router.get('/fetch-user/log/:id',
     verifySuperAdminToken,
     verifyAdminExist,
     fetchAllUserLogActivity
@@ -245,7 +254,7 @@ router.post('/request-password-reset',
 
 /**
  * @swagger
- * /api/v1/user/reset-password:
+ * /api/v1/user/new-password/{token}:
  *   post:
  *     summary: Admin should be able to create a new password for a user in our database if authenticated
  *     responses:
@@ -254,7 +263,7 @@ router.post('/request-password-reset',
  *       400:
  *         description: Bad request
  */
-router.post('/reset-password',
+router.post('/new-password/:token',
     verifySuperAdminToken,
     verifyAdminExist,
     adminResetNewUserPassword

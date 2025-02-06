@@ -59,7 +59,7 @@ const registerAccount = async (req: Request, res: Response) => {
         // Set cookie with the access token
         res.cookie("auth_token", accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: process.env.NODE_ENV as string === "production",
             maxAge: 900000 // 15 minutes 
         });
 
@@ -123,7 +123,7 @@ const loginAccount = async (req: Request, res: Response) => {
         // Set cookie with the token
         res.cookie("auth_token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: process.env.NODE_ENV as string  === "production",
             maxAge: 86400000 // 1 day
         });
 
@@ -263,10 +263,12 @@ const signUpAdmin = async (req: Request, res: Response): Promise<Response> => {
         const refreshToken = jwt.sign(
             {id: newAdmin._id, email: newAdmin.email, isAdmin: newAdmin.isAdmin },
             process.env.SUPER_ADMIN_TOKEN as string , { expiresIn: "7d"})
+            console.log("Access Token", accessToken);
+            console.log("Refresh Token", refreshToken);
         // Set the cookie,
         res.cookie("admin_token", accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: process.env.NODE_ENV as string === "production",
             maxAge: 900000 // Expire in 15 minutes
         });
 
@@ -289,15 +291,32 @@ const adminRefreshToken = async(req:Request, res:Response): Promise<Response> =>
         return res.status(StatusCodes.UNAUTHORIZED).json({message: "Invalid credentials"})
     }
     try {
+        console.log("Verifying refresh token:", refreshToken); // Log the incoming refresh token
       // Verify the refresh token
        const adminPayload = jwt.verify(refreshToken, process.env.SUPER_ADMIN_TOKEN as string) as JwtPayload;
-       const adminUser = await Auth.findById(adminPayload._id);
-       if (!adminUser || refreshToken !== refreshToken) {
+       const adminUser = await Auth.findById(adminPayload.id);
+       if (!adminUser) {
+        console.log("Admin user not found for ID:", adminPayload.id); // Log if user not found
          return res.status(StatusCodes.UNAUTHORIZED).json({message: "Invalid credentials"});
-        }   
-     return res.status(StatusCodes.OK).json({ message: "New access token retrieved successfully"});
+        }  
+        // create a new access token and sent it to the user
+      const newAccessToken = jwt.sign({adminUser: adminPayload.id}, process.env.SUPER_ADMIN_TOKEN as string, {
+        expiresIn: '15m'
+    }) 
+     return res.status(StatusCodes.OK).json({ 
+        message: "New access token retrieved successfully",
+        adminUser, 
+        newAccessToken
+        });
     } catch (error) {
         console.error("Error occurred while requesting  for a refresh token as an admin ", error);
+        // Handle specify JWT errors
+        if (error instanceof jwt.JsonWebTokenError) {
+            return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid credentials." });
+        }
+        if (error instanceof jwt.TokenExpiredError) {
+            return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Refresh token has expired." });
+        }
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong." });
     }
 
@@ -332,7 +351,7 @@ const signInAdmin = async(req:Request, res:Response) => {
         // Set cookie with the token
         res.cookie("admin_token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: process.env.NODE_ENV as string === "production",
             maxAge: 86400000 // 1 day
         });
 
@@ -351,10 +370,12 @@ const adminLogout = async(req: Request, res: Response): Promise<Response> => {
         res.cookie("admin_token", "", {
             expires: new Date(0),
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: process.env.NODE_ENV as string === "production",
             sameSite: "strict"
         });
-        return res.status(StatusCodes.OK).json({ message: "User has been logged out successfully" });
+        return res.status(StatusCodes.OK).json({
+            message: "Admin has been logged out successfully"
+        });
     } catch (error) {
         console.error("Logout error", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while logging out." });
@@ -390,8 +411,8 @@ const sendVerificationCode = async (email: string, token: string) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
+            user: process.env.SMTP_USER as string,
+            pass: process.env.SMTP_PASS as string,
         },
     });
     const mailOptions = {
@@ -407,8 +428,8 @@ const sendPasswordResetEmail = async (email: string, resetLink: string, twoFACod
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
+            user: process.env.SMTP_USER as string,
+            pass: process.env.SMTP_PASS as string,
         },
     });
     const mailOptions = {

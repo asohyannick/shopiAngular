@@ -17,7 +17,7 @@ try {
         await sendEmail(email, subject, text); // Send email
         await delay(delayBetweenEmails); // wait before sending the next email 
     } 
-    return res.status(StatusCodes.OK).json({message: "Notifications has been sent to you successfully"});
+    return res.status(StatusCodes.OK).json({message: "Notifications has been sent to you successfully", userEmails});
 } catch (error) {
     console.log("Error occur while sending emails from the database to our users...", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({message: "Something went wrong"});
@@ -54,9 +54,9 @@ const sendPushNotifications = async(res: Response, title: string, body: string):
             body
         },
     }
-    const response = await axios.post(`${process.env.FIREBASE_CLOUD_MESSAGING_CONNECTION_STRING}`, message, {
+    const response = await axios.post(`${process.env.FIREBASE_CLOUD_MESSAGING_CONNECTION_STRING as string}`, message, {
       headers:{
-        "Authorization": `key=${process.env.FIREBASE_CLOUD_MESSAGING_SERVER_KEY}`,
+        "Authorization": `key=${process.env.FIREBASE_CLOUD_MESSAGING_SERVER_KEY as string}`,
         "Content-Type": "application/json",
       },
     });
