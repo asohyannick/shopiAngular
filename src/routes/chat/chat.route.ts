@@ -66,7 +66,7 @@ router.get('/fetch-chats',
 
 /**
  * @swagger
- * /api/v1/chat/fetch-chat:
+ * /api/v1/chat/fetch-chat/{id}:
  *   get:
  *     summary: Fetch a specific chat (Admin and users must be authenticated)
  *     responses:
@@ -77,7 +77,7 @@ router.get('/fetch-chats',
  *       500:
  *         description: Internal server error. Unable to fetch chat.
  */
-router.get('/fetch-chat',
+router.get('/fetch-chat/:id',
     verifyGeneralApplicationAuthenticationToken,
     (req: Request, res: Response, next: NextFunction) => {
         if (req.user && req.user.isAdmin) {
@@ -90,7 +90,7 @@ router.get('/fetch-chat',
 
 /**
  * @swagger
- * /api/v1/chat/update-chat:
+ * /api/v1/chat/update-chat/{id}:
  *   put:
  *     summary: Update a chat (Admin and users must be authenticated)
  *     responses:
@@ -103,7 +103,7 @@ router.get('/fetch-chat',
  *       500:
  *         description: Internal server error. Unable to update chat.
  */
-router.put('/update-chat',
+router.put('/update-chat/:id',
     verifyGeneralApplicationAuthenticationToken,
     (req: Request, res: Response, next: NextFunction) => {
         if (req.user && req.user.isAdmin) {
@@ -116,7 +116,7 @@ router.put('/update-chat',
 
 /**
  * @swagger
- * /api/v1/chat/remove-chat:
+ * /api/v1/chat/remove-chat/{id}:
  *   delete:
  *     summary: Delete a chat (Admin and users must be authenticated)
  *     responses:
@@ -129,7 +129,7 @@ router.put('/update-chat',
  *       500:
  *         description: Internal server error. Unable to delete chat.
  */
-router.delete('/remove-chat',
+router.delete('/remove-chat/:id',
     verifyGeneralApplicationAuthenticationToken,
     (req: Request, res: Response, next: NextFunction) => {
         if (req.user && req.user.isAdmin) {
@@ -168,7 +168,7 @@ router.post('/message/reply',
 
 /**
  * @swagger
- * /api/v1/chat/message/like:
+ * /api/v1/chat/like-chat:
  *   post:
  *     summary: Like a message (Admin and users must be authenticated)
  *     responses:
@@ -181,7 +181,7 @@ router.post('/message/reply',
  *       500:
  *         description: Internal server error. Unable to like message.
  */
-router.post('/message/like',
+router.post('/like-chat',
     verifyGeneralApplicationAuthenticationToken,
     (req: Request, res: Response, next: NextFunction) => {
         if (req.user && req.user.isAdmin) {
@@ -194,7 +194,7 @@ router.post('/message/like',
 
 /**
  * @swagger
- * /api/v1/chat/message/unlike:
+ * /api/v1/chat/unlike-chat:
  *   post:
  *     summary: Unlike a message (Admin and users must be authenticated)
  *     responses:
@@ -207,7 +207,7 @@ router.post('/message/like',
  *       500:
  *         description: Internal server error. Unable to unlike message.
  */
-router.post('/message/unlike',
+router.post('/unlike-chat',
     verifyGeneralApplicationAuthenticationToken,
     (req: Request, res: Response, next: NextFunction) => {
         if (req.user && req.user.isAdmin) {

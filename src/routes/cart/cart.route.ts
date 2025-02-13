@@ -10,7 +10,7 @@ import {
 const router = express.Router();
 /**
  * @swagger
- * /api/v1/shopping-cart/add-cart:
+ * /api/v1/shopping-cart/add-to-cart:
  *   post:
  *     summary: Add a product to the shopping cart (User must be authenticated)
  *     responses:
@@ -23,7 +23,7 @@ const router = express.Router();
  *       500:
  *         description: Internal server error. Unable to add product to cart.
  */
-router.post('/add-cart',
+router.post('/add-to-cart',
     verifyGeneralApplicationAuthenticationToken,
     addProductToCart
 );
@@ -50,7 +50,7 @@ router.put('/update-cart',
 
 /**
  * @swagger
- * /api/v1/shopping-cart/remove-cart-item:
+ * /api/v1/shopping-cart/remove-cart-item/:id:
  *   delete:
  *     summary: Remove a product from the shopping cart (User must be authenticated)
  *     responses:
@@ -63,14 +63,14 @@ router.put('/update-cart',
  *       500:
  *         description: Internal server error. Unable to remove product from cart.
  */
-router.delete('/remove-cart-item',
+router.delete('/remove-cart-item/:id',
     verifyGeneralApplicationAuthenticationToken,
     removeProductFromCart
 );
 
 /**
  * @swagger
- * /api/v1/shopping-cart/clear-cart/{userId}:
+ * /api/v1/shopping-cart/clear-cart/{id}:
  *   delete:
  *     summary: Clear all products from the shopping cart (User must be authenticated)
  *     parameters:
@@ -92,7 +92,7 @@ router.delete('/remove-cart-item',
  *       500:
  *         description: Internal server error. Unable to clear cart.
  */
-router.delete('/clear-cart/:userId',
+router.delete('/clear-cart/:id',
     verifyGeneralApplicationAuthenticationToken,
     clearCart
 );

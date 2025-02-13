@@ -26,6 +26,9 @@ try {
 
 const registerNotificationFCMToken = async(req:Request, res:Response): Promise<Response> => {
     const {email, fcmToken } = req.body;
+    if(!email || !fcmToken) {
+        return res.status(StatusCodes.BAD_REQUEST).json({message: "Email and FCM Token is required"});
+    }
   try {
     const  user = await Auth.findOneAndUpdate(
         {email},

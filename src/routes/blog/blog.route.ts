@@ -6,7 +6,7 @@ import {
 } from '../../middleware/auth/auth';
 import { 
     createBlog, 
-    uploadImages, 
+    // uploadImages, 
     fetchBlogs, 
     fetchBlog, 
     updateBlog, 
@@ -75,7 +75,7 @@ router.post('/create-post',
     schemaValidator('/my-blog/create-post'),
     verifySuperAdminToken,
     verifyAdminExist,
-    uploadImages,
+    // uploadImages,
     createBlog
 );
 

@@ -10,7 +10,7 @@ import {
 const router = express.Router();
 /**
  * @swagger
- * /api/v1/notify/notify/notify-users:
+ * /api/v1/notify/notify-users:
  *   post:
  *     summary: Send email notifications to all users (Admin and authenticated users)
  *     responses:
@@ -33,7 +33,6 @@ router.post('/notify-users',
     }, 
     notifyAllUsers,
 );
-
 /**
  * @swagger
  * /api/v1/notify/register-token:

@@ -1,15 +1,15 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import Blog from "../../models/blog/blog.model";
-import cloudinary from '../../config/cloudinaryConfig/cloudinaryConfig';
-import compressImage from '../../utils/compressedImages/compressImage';
+// import cloudinary from '../../config/cloudinaryConfig/cloudinaryConfig';
+// import compressImage from '../../utils/compressedImages/compressImage';
 import multer from 'multer';
 import Comment from "../../models/comment/comment.model";
 // Define the expected structure of the Cloudinary response
-interface CloudinaryUploadResponse {
-    secure_url: string;
-    // Include any other properties from the response you may need
-}
+// interface CloudinaryUploadResponse {
+//     secure_url: string;
+//     // Include any other properties from the response you may need
+// }
 
 // Configure multer
 const storage = multer.memoryStorage(); // Store files in memory
@@ -18,38 +18,37 @@ const upload = multer({ storage: storage }); // Multer setup with memory storage
 // Defining the upload images function
 const uploadImages = upload.array('imageURLs', 20);
 const createBlog = async(req:Request, res:Response): Promise<Response> => {
-const {title, content, author, tags,  excerpt, published } = req.body;
+const {title, content, author, email, tags, imageURLs,  excerpt, published } = req.body;
 
  if (!req.user || !req.user.isAdmin) {
     return res.status(StatusCodes.FORBIDDEN).json({ message: "You are not allowed to create a blog post" });
  }
 
  try {
-    const files = req.files as Express.Multer.File[]; // Get the uploaded files
-if (!files || files.length === 0) {
-    return res.status(StatusCodes.NOT_FOUND).json({ message: "No images provided" });
-}
-const uploadedImageURLs: string[] = []; 
-// Upload each file to Cloudinary
-for (const file of files) {
-    const compressedImage = await compressImage(file.buffer);
-    const result = await new Promise<CloudinaryUploadResponse>((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream((error, result) => {
-            if (error) reject(error);
-            else resolve(result as CloudinaryUploadResponse);
-        });
-        stream.end(compressedImage); // Use buffer from memory storage
-    });
-    // Ensure the result has a secure_url
-    uploadedImageURLs.push(result.secure_url);
-}
+//    const files = req.files as Express.Multer.File[]; 
+//   if (!files || files.length === 0) {
+//     return res.status(StatusCodes.NOT_FOUND).json({ message: "No images provided" });
+//   }
+//    const uploadedImageURLs: string[] = []; 
+//   for (const file of files) {
+//     const compressedImage = await compressImage(file.buffer);
+//     const result = await new Promise<CloudinaryUploadResponse>((resolve, reject) => {
+//         const stream = cloudinary.uploader.upload_stream((error, result) => {
+//             if (error) reject(error);
+//             else resolve(result as CloudinaryUploadResponse);
+//         });
+//         stream.end(compressedImage); 
+//     });
+//     uploadedImageURLs.push(result.secure_url);
     const newBlog = new Blog({
       title,
       content,
+      email,
       author,
       tags,
       date: Date.now(),
-      imageURLs: uploadedImageURLs,
+      // imageURLs: uploadedImageURLs,
+      imageURLs,
       excerpt,
       published
     });
@@ -104,7 +103,7 @@ const updateBlog = async(req:Request, res:Response): Promise<Response> => {
     if (!post) {
       return res.status(StatusCodes.NOT_FOUND).json({message: "Blog post not found"});
    }
-   return res.status(StatusCodes.NOT_FOUND).json({message: "Blog post has been updated successfully", post});
+   return res.status(StatusCodes.OK).json({message: "Blog post has been updated successfully", post});
  } catch (error) {
     console.error("Error occurred while updating a blog post ", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });
@@ -209,7 +208,7 @@ const removeComment = async(req:Request, res:Response): Promise<Response> => {
    if (!comment) {
    return res.status(StatusCodes.NOT_FOUND).json({message: "Comment not found"}); 
   }
-   return res.status(StatusCodes.OK).json({message: "Comment has been updated successfully", comment}) 
+   return res.status(StatusCodes.OK).json({message: "Comment has been deleted successfully", comment}) 
   } catch (error) {
    console.error("Error occurred while removing  comment", error);
    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });

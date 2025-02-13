@@ -8,7 +8,8 @@ const {
     discountType, 
     discountValue, 
     expirationDate,
-    userId
+    userId,
+    isActive,
 } = req.body;
 try {
     const code = generateRandomPromoCode() // Generate a random promo code
@@ -17,6 +18,7 @@ try {
         discountType,
         discountValue,
         expirationDate,
+        isActive,
         requestedBy: userId || undefined, // set user Id only if it is provided
     });
     await promoCode.save();
@@ -37,6 +39,9 @@ const applyPromoCode = async(req: Request, res:Response): Promise<Response> => {
     // Check if promo code has expired
     if (promoCode.expirationDate && promoCode.expirationDate < new Date()) {
         return res.status(StatusCodes.BAD_REQUEST).json({message: "Promo code has expired"});
+    }
+    if (typeof cartTotal !== "number") {
+        return res.status(StatusCodes.BAD_REQUEST).json({message: "Invalid cart total"});
     }
     let discount:number = 0;
     if (promoCode.discountType === 'percentage') {

@@ -2,24 +2,25 @@ import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import Testimonial from "../../models/testimonial/testimonail.model";
 import { ITestimonailStatus } from "../../types/testimonialType/testimonialType";
-import multer from 'multer';
-import cloudinary from '../../config/cloudinaryConfig/cloudinaryConfig';
-import compressImage from '../../utils/compressedImages/compressImage';
+// import multer from 'multer';
+// import cloudinary from '../../config/cloudinaryConfig/cloudinaryConfig';
+// import compressImage from '../../utils/compressedImages/compressImage';
 
-interface CloudinaryUploadResponse {
-    secure_url: string;
-}
-
+// interface CloudinaryUploadResponse {
+    // secure_url: string;
+// }
+// 
 // Configure multer
-const storage = multer.memoryStorage(); // Store files in memory
-const upload = multer({ storage: storage }); // Multer setup with memory storage
+// const storage = multer.memoryStorage(); // Store files in memory
+// const upload = multer({ storage: storage }); // Multer setup with memory storage
 
-// Defining the upload images function
-const uploadImages = upload.array('profileImage', 20);
+// // Defining the upload images function
+// const uploadImages = upload.array('profileImage', 20);
 
 const createTestimonial = async(req:Request, res:Response): Promise<Response> => {
     const {
         userId, 
+        profileImage,
         title, 
         name, 
         message, 
@@ -27,27 +28,26 @@ const createTestimonial = async(req:Request, res:Response): Promise<Response> =>
         continent
     } = req.body;
  try {
-    const files = req.files as Express.Multer.File[]; // Get the uploaded files
- if (!files || files.length === 0) {
-     return res.status(StatusCodes.NOT_FOUND).json({ message: "No images provided" });
- }
- const uploadedImageURLs: string[] = []; // Use a different name to avoid conflict
- // Upload each file to Cloudinary
- for (const file of files) {
-     const compressedImage = await compressImage(file.buffer);
-     const result = await new Promise<CloudinaryUploadResponse>((resolve, reject) => {
-         const stream = cloudinary.uploader.upload_stream((error, result) => {
-             if (error) reject(error);
-             else resolve(result as CloudinaryUploadResponse);
-         });
-         stream.end(compressedImage); // Use buffer from memory storage
-     });
-     // Ensure the result has a secure_url
-     uploadedImageURLs.push(result.secure_url);
- }
+//     const files = req.files as Express.Multer.File[];
+//  if (!files || files.length === 0) {
+//      return res.status(StatusCodes.NOT_FOUND).json({ message: "No images provided" });
+//  }
+//  const uploadedImageURLs: string[] = []; 
+//  for (const file of files) {
+//      const compressedImage = await compressImage(file.buffer);
+//      const result = await new Promise<CloudinaryUploadResponse>((resolve, reject) => {
+//          const stream = cloudinary.uploader.upload_stream((error, result) => {
+//              if (error) reject(error);
+//              else resolve(result as CloudinaryUploadResponse);
+//          });
+//          stream.end(compressedImage); 
+//      });
+//      // Ensure the result has a secure_url
+//      uploadedImageURLs.push(result.secure_url);
+//  }
     const newTestimonial = new Testimonial({
         userId,
-        profileImage: uploadedImageURLs,
+        profileImage,
         name,
         title,
         message,
@@ -134,7 +134,7 @@ const removeTestimonial = async(req:Request, res:Response): Promise<Response> =>
 
 export {
     createTestimonial,
-    uploadImages,
+    // uploadImages,
     fetchTestimonials,
     fetchTestimonial,
     updateTestimonial,

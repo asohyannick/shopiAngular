@@ -2,8 +2,8 @@ import mongoose, { Schema } from 'mongoose';
 import { IPaypalType, PayPalPaymentStatus } from '../../../types/paymentTypes/paypalType/paypalType';
 const paypalSchema: Schema = new Schema<IPaypalType>({
  paymentId: {
-    type: String,
-    required: true,
+   type: String,
+   required: true,
  },
  amount:{
     type: Number,

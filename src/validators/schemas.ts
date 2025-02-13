@@ -148,12 +148,12 @@ const suggestionValidationSchema = Joi.object({
 });
 
 const blogSchema = Joi.object<IBlogType>({
-  title: Joi.string().required().min(1).max(255).messages({
+  title: Joi.string().optional().min(1).max(255).messages({
     'string.base': 'Title must be a string',
     'string.empty': 'Title cannot be empty',
     'any.required': 'Title is required',
   }),
-  content: Joi.string().required().messages({
+  content: Joi.string().optional().messages({
     'string.base': 'Content must be a string',
     'string.empty': 'Content cannot be empty',
     'any.required': 'Content is required',
@@ -163,10 +163,11 @@ const blogSchema = Joi.object<IBlogType>({
       return helpers.error('any.invalid');
     }
     return value;
-  }).required().messages({
+  }).optional().messages({
     'any.required': 'Author ID is required',
     'any.invalid': 'Author ID must be a valid ObjectId',
   }),
+  email: Joi.string().required(),
   tags: Joi.array().items(Joi.string()).optional().messages({
     'array.base': 'Tags must be an array of strings',
   }),

@@ -4,20 +4,43 @@ import Order from "../../models/order/order.model";
 import { io } from "../../index";
 import OrderHistory from "../../models/order/orderHistory.model";
 
+
+const createOrder = async(req:Request, res:Response): Promise<Response> => {
+  const { 
+    userId,
+    products,
+    status,
+    trackingNumber
+  } = req.body;
+  try {
+    const createOrder = new Order({
+      userId,
+      products,
+      status,
+      trackingNumber
+    });
+    await createOrder.save();
+    return res.status(StatusCodes.CREATED).json({message: "Order has been created successfully", createOrder});
+  } catch(error) {
+  console.error("Error occurred while creating an order", error);
+  return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" }); 
+  }
+}
+
 const createOrderHistory = async(req:Request, res:Response): Promise<Response> => {
     const { id } = req.params;
     const {
-        status,
-        notes, 
-        changedBy, 
-        changeReason, 
-        previousStatus 
+      status,
+      notes, 
+      changedBy, 
+      changeReason, 
+      previousStatus 
 } = req.body;
   try {
     // Check if the associated user exists
     const order = await Order.findById(id);
     if (!order) {
-        return res.status(StatusCodes.NOT_FOUND).json({message: "Order not found"});
+      return res.status(StatusCodes.NOT_FOUND).json({message: "Order not found"});
     }
     // Create a new order history record
     const newHistory = new OrderHistory({
@@ -29,7 +52,11 @@ const createOrderHistory = async(req:Request, res:Response): Promise<Response> =
         previousStatus // Previous status before the change
     });
     await newHistory.save();
-    return res.status(StatusCodes.CREATED).json({message: "Order history has been created successfully.", newHistory});
+    return res.status(StatusCodes.CREATED).json({
+      success: true,
+      message: "Order history has been created successfully.", 
+      newHistory
+    });
   } catch (error) {
     console.error("Error occurred while creating an order", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" }); 
@@ -52,17 +79,18 @@ const fetchAllOrderHistories = async(req:Request, res:Response): Promise<Respons
 }
 
 const updateOrderHistory = async(req:Request, res:Response): Promise<Response> => {
-    const { status } = req.body;
+  const { id } = req.params;
   try {
-    const order = await Order.findById(req.params.id);
-    if (!order) {
+    const orderUpdated = await OrderHistory.findByIdAndUpdate(id, req.body, {new: true});
+    if (!orderUpdated) {
         return res.status(StatusCodes.NOT_FOUND).json({message: "Order not found"})
     }
-    order.status = status;
-    await order.save();
     // Emit event to notify the client about the status update 
-    io.emit('orderUpdated', {orderId: order._id, status});
-    return res.status(StatusCodes.OK).json({message: "Order status has been updated successfully.", order})
+    io.emit('orderUpdated', {orderId: orderUpdated.orderId});
+    return res.status(StatusCodes.OK).json({
+      message: "Order status has been updated successfully.", 
+      orderUpdated
+    })
   } catch (error) {
     console.error("Error occurred while updating an order", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" }); 
@@ -70,25 +98,35 @@ const updateOrderHistory = async(req:Request, res:Response): Promise<Response> =
 }
 
 const orderHistoryDetails = async(req:Request, res:Response): Promise<Response> => {
+  const { id } = req.params;
   try {
-    const order = await Order.findById(req.params.id).populate('products.productId');
-    if (!order) {
+    const orderDetails = await Order.findById(id).populate('products.productId');
+    if (!orderDetails) {
         return res.status(StatusCodes.NOT_FOUND).json({message: "Order not found"})
     }
     // Emit an event to notify the client about the order fetch
-    io.emit('orderUpdated', {orderId: order._id});
-    return res.status(StatusCodes.OK).json({message: "Order details has been fetched successfully.", order})
+    io.emit('orderUpdated', {orderId: orderDetails._id});
+    return res.status(StatusCodes.OK).json({
+      message: "Order details has been fetched successfully.", 
+      orderDetails
+    })
   } catch (error) {
     console.error("Error occurred while fetching the details of an  order", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" }); 
   }
 }
 
-const fetchUserOrders = async(req:Request, res:Response): Promise<Response> => {
-    const {userId} = req.body;
+const fetchUserOrder = async(req:Request, res:Response): Promise<Response> => {
+  const { id } = req.params;
   try {
-    const orders = await Order.find({ userId }).populate("Products.productId");
-    return res.status(StatusCodes.OK).json({message: "Order history has been fetched successfully.", orders});
+    const orders = await Order.find({userId: id}).populate("products.productId");
+    if (!orders) {
+      return res.status(StatusCodes.BAD_REQUEST).json({message: "User's order hsitory does not exist"});
+    }
+    return res.status(StatusCodes.OK).json({
+      message: "User's order history has been fetched successfully.",
+      orders
+    });
   } catch (error) {
     console.error("Error occurred while fetch a user with the associated  order", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" }); 
@@ -96,7 +134,7 @@ const fetchUserOrders = async(req:Request, res:Response): Promise<Response> => {
 }
 
 const cancelAnOrder = async(req:Request, res:Response): Promise<Response> => {
-    const {id} = req.params;
+  const { id } = req.params;
   try {
     const order = await Order.findById(id);
     if (!order) {
@@ -118,14 +156,16 @@ const cancelAnOrder = async(req:Request, res:Response): Promise<Response> => {
 }
 
 const orderHistory = async(req:Request, res:Response): Promise<Response> => {
-    const {id} = req.params;
+  const {id} = req.params;
   try {
-    const order = await Order.findById(id);
-    if (!order) {
-        return res.status(StatusCodes.NOT_FOUND).json({message: "Order not found"});
+    const orderHistory = await OrderHistory.findById(id);
+    if (!orderHistory) {
+      return res.status(StatusCodes.NOT_FOUND).json({message: "Order not found"});
     }
-    const orderHistory = await OrderHistory.find({orderId: order._id});
-    return res.status(StatusCodes.OK).json({message: "Order history has been fetched successfully.", orderHistory});
+    return res.status(StatusCodes.OK).json({
+      message: "Order history has been fetched successfully.", 
+      orderHistory
+    });
   } catch (error) {
     console.error("Error occurred while fetching an order", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" }); 
@@ -133,14 +173,16 @@ const orderHistory = async(req:Request, res:Response): Promise<Response> => {
 }
 
 const deleteOrderHistory = async(req:Request, res:Response): Promise<Response> => {
-  const { historyId } = req.params;
+  const { id } = req.params;
   try {
-    const historyRecord = await OrderHistory.findById(historyId);
+    const historyRecord = await OrderHistory.findByIdAndDelete(id);
     if (!historyRecord) {
       return res.status(StatusCodes.NOT_FOUND).json({message: "Order history not found."});
     }
-    await OrderHistory.findByIdAndDelete(historyId);
-    return res.status(StatusCodes.OK).json({message: "Order history has been deleted successfully.", historyRecord});
+    return res.status(StatusCodes.OK).json({
+      message: "Order history has been deleted successfully.", 
+      historyRecord
+    });
   } catch (error) {
     console.error("Error occurred while deleting an order", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" }); 
@@ -149,13 +191,16 @@ const deleteOrderHistory = async(req:Request, res:Response): Promise<Response> =
 
 // Fetch past orders for a user
 const pastOrder = async(req:Request, res:Response):Promise<Response> => {
-const { userId } = req.params;
+const { id } = req.params;
 try {
-  const orders = await Order.find({ userId }).populate('products.productId');
-  if (!orders.length) {
-      return res.status(StatusCodes.NOT_FOUND).json({message: "No past orders found."});
+  const orders = await Order.findById(id).populate('products.productId');
+  if (!orders) {
+    return res.status(StatusCodes.NOT_FOUND).json({message: "No past orders found."});
   }
-  return res.status(StatusCodes.OK).json({message: "Past order histories have been fetched successfully", orders});
+  return res.status(StatusCodes.OK).json({
+    message: "Past order histories have been fetched successfully", 
+    orders
+  });
 } catch (error) {
   console.error("Error occurred while fetching past order", error);
  return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" }); 
@@ -165,11 +210,12 @@ try {
 
 
 export {
+  createOrder,
   createOrderHistory,
   fetchAllOrderHistories,
   updateOrderHistory,
   orderHistoryDetails,
-  fetchUserOrders,
+  fetchUserOrder,
   cancelAnOrder,
   orderHistory,
   deleteOrderHistory,

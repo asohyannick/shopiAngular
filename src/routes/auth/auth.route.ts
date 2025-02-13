@@ -31,13 +31,13 @@ import { redirectClient, AuthenticateInstagramUser } from '../../controllers/aut
 import { twitterAuth, twitterAuthentication } from '../../controllers/auth/twitterAuth/twitterAuth';
 import { linkedinAuth, linkedinCallback } from '../../controllers/auth/linkedInAuth/linkedInAuth';
 const router = express.Router();
-
-// General Authentication Route
 /**
  * @swagger
  * /api/v1/auth/register:
  *   post:
  *     summary: Register a new user
+ *     tags: 
+ *       - Authentication API endpoints  
  *     requestBody:
  *       required: true
  *       content:
@@ -72,7 +72,8 @@ router.post(
  * /api/v1/auth/refresh-token:
  *   post:
  *     summary: Refresh access token using a refresh token
- *     tags: [Auth]
+ *     tags: 
+ *       - Authentication API endpoints  
  *     requestBody:
  *       required: true
  *       content:
@@ -108,6 +109,8 @@ router.post(
  * /api/v1/auth/login:
  *   post:
  *     summary: Login an authenticated user
+ *     tags: 
+ *       - Authentication API endpoints  
  *     requestBody:
  *       required: true
  *       content:
@@ -141,6 +144,8 @@ router.post(
  * /api/v1/auth/users:
  *   get:
  *     summary: Fetch all users
+ *     tags: 
+ *       - Authentication API endpoints  
  *     responses:
  *       200:
  *         description: Users fetched successfully.
@@ -160,6 +165,8 @@ router.get(
  * /api/v1/auth/single-account/{id}:
  *   get:
  *     summary: Fetch a single user by ID
+ *     tags:
+ *       - Authentication API endpoints  
  *     parameters:
  *       - name: id
  *         in: path
@@ -188,6 +195,8 @@ router.get(
  * /api/v1/auth/update-account/{id}:
  *   put:
  *     summary: Update a single user by ID
+ *     tags:
+ *       - Authentication API endpoints  
  *     parameters:
  *       - name: id
  *         in: path
@@ -216,6 +225,8 @@ router.put(
  * /api/v1/auth/delete-account/{id}:
  *   delete:
  *     summary: Delete a single user by ID
+ *     tags:
+ *       - Authentication API endpoints 
  *     parameters:
  *       - name: id
  *         in: path
@@ -244,6 +255,8 @@ router.delete(
  * /api/v1/auth/password-reset:
  *   post:
  *     summary: Request a password reset
+ *     tags:
+ *       - Authentication API endpoints
  *     responses:
  *       200:
  *         description: Password reset request handled successfully.
@@ -263,6 +276,8 @@ router.post(
  * /api/v1/auth/set-new-password/{token}:
  *   post:
  *     summary: Set a new password using a reset token
+ *     tags:
+ *       - Authentication API endpoints 
  *     parameters:
  *       - name: token
  *         in: path
@@ -290,6 +305,8 @@ router.post("/set-new-password/:token",
  * /api/v1/auth/logout:
  *   post:
  *     summary: Logout the authenticated user
+ *     tags:
+ *       - Authentication API endpoints 
  *     responses:
  *       200:
  *         description: User logged out successfully.
@@ -310,6 +327,8 @@ router.post(
  * /api/v1/auth/admin/signup:
  *   post:
  *     summary: Admin signup for an account
+ *     tags:
+ *       - Authentication API endpoints 
  *     responses:
  *       201:
  *         description: Admin signed up successfully.
@@ -329,8 +348,9 @@ router.post(
  * /api/v1/auth/admin/refresh-token:
  *   post:
  *     summary: Refresh Admin Access Token
- *     description: This endpoint allows an admin to refresh their access token using a valid refresh token.
- *     tags: [Admin]
+ *     description: This endpoint allows an admin to refresh their access token using a
+ *     tags: 
+ *       - Authentication API endpoints  
  *     requestBody:
  *       required: true
  *       content:
@@ -362,26 +382,18 @@ router.post(
  *       500:
  *         description: Internal server error, something went wrong.
  */
-
 router.post(
     '/admin/refresh-token', 
     adminRefreshToken
 );
 
 /**
- * Admin Refresh Token Handler
- * @function adminRefreshToken
- * @param {Request} req - The request object containing the refresh token.
- * @param {Response} res - The response object to send the result back to the client.
- * @returns {void}
- */
-
-
-/**
  * @swagger
  * /api/v1/auth/admin/signin:
  *   post:
  *     summary: Admin login
+ *     tags:
+ *       - Authentication API endpoints 
  *     responses:
  *       200:
  *         description: Admin signed in successfully.
@@ -403,6 +415,8 @@ router.post(
  * /api/v1/auth/admin/logout:
  *   post:
  *     summary: Admin logout
+ *     tags:
+ *       - Authentication API endpoints  
  *     responses:
  *       200:
  *         description: Admin logged out successfully.
@@ -421,6 +435,8 @@ router.post(
  * /api/v1/auth/admin/update-account:
  *   put:
  *     summary: Admin update their account
+ *     tags:
+ *       - Authentication API endpoints  
  *     responses:
  *       200:
  *         description: Admin account updated successfully.
@@ -442,6 +458,8 @@ router.put('/admin/update-account/:id',
  * /api/v1/auth/google/auth:
  *   post:
  *     summary: Login using Google account
+ *     tags:
+ *       - Authentication API endpoints 
  *     responses:
  *       200:
  *         description: User logged in successfully.
@@ -460,6 +478,8 @@ router.post('/google/auth',
  * /api/v1/auth/redirect/github:
  *   get:
  *     summary: Authenticate using GitHub account
+ *     tags:
+ *       - Authentication API endpoints  
  *     responses:
  *       200:
  *         description: User authenticated successfully.
@@ -477,6 +497,8 @@ router.get('/redirect/github',
  * /api/v1/auth/github/auth/callback:
  *   get:
  *     summary: Redirect after GitHub authentication
+ *     tags:
+ *       - Authentication API endpoints 
  *     responses:
  *       200:
  *         description: User redirected successfully.
@@ -496,6 +518,8 @@ router.get('/github/auth/callback',
  * /api/v1/auth/redirect/facebook:
  *   get:
  *     summary: Authenticate using Facebook account
+ *     tags:
+ *       - Authentication API endpoints  
  *     responses:
  *       200:
  *         description: User authenticated successfully.
@@ -513,6 +537,8 @@ router.get('/redirect/facebook',
  * /api/v1/auth/facebook/auth/callback:
  *   get:
  *     summary: Redirect after Facebook authentication
+ *     tags:
+ *       - Authentication API endpoints 
  *     responses:
  *       200:
  *         description: User redirected successfully.
@@ -533,7 +559,7 @@ router.get('/facebook/auth/callback',
  *     summary: Redirect to Instagram for authentication
  *     description: Redirects the user to the Instagram login page for authentication.
  *     tags:
- *       - Authentication
+ *       - Authentication API endpoints  
  *     responses:
  *       302:
  *         description: Redirects to Instagram login
@@ -555,7 +581,7 @@ router.get('/auth/instagram',
  *     summary: Handle Instagram authentication callback
  *     description: Exchange the authorization code for an access token and authenticate the user.
  *     tags:
- *       - Authentication
+ *       - Authentication API endpoints 
  *     parameters:
  *       - name: code
  *         in: query
@@ -585,19 +611,14 @@ router.get('/instagram/auth/callback',
     AuthenticateInstagramUser
 );
 
-/**
- * @swagger
- * tags:
- *   name: TwitterAuth
- *   description: Twitter authentication endpoints
- */
 
 /**
  * @swagger
  * /api/v1/auth/twitter/auth/register:
  *   get:
  *     summary: Initiate Twitter authentication
- *     tags: [TwitterAuth]
+ *     tags: 
+ *       - Authentication API endpoints 
  *     description: Redirects the user to Twitter for authentication.
  *     responses:
  *       302:
@@ -615,7 +636,8 @@ router.get('/twitter/auth/register',
  * /api/v1/auth/twitter/auth/callback:
  *   get:
  *     summary: Handle Twitter authentication callback
- *     tags: [TwitterAuth]
+ *     tags: 
+ *       - Authentication API endpoints  
  *     description: Handles the callback from Twitter after the user has authenticated.
  *     responses:
  *       200:
@@ -630,19 +652,14 @@ router.get('/twitter/auth/callback',
     twitterAuthentication
 );
 
-/**
- * @swagger
- * tags:
- *   name: LinkedInAuth
- *   description: LinkedIn authentication endpoints
- */
 
 /**
  * @swagger
  * /api/v1/auth/linkedin/auth:
  *   get:
  *     summary: Initiate LinkedIn authentication
- *     tags: [LinkedInAuth]
+ *     tags: 
+ *       - Authentication API endpoints 
  *     description: Redirects the user to LinkedIn for authentication.
  *     responses:
  *       302:
@@ -650,10 +667,9 @@ router.get('/twitter/auth/callback',
  *       500:
  *         description: Internal server error due to missing environment variables.
  */
-
 router.get('/linkedin/auth',
     verifyThirdPartyAuthToken,
-    linkedinAuth,
+    linkedinAuth
 );
 
 /**
@@ -661,7 +677,8 @@ router.get('/linkedin/auth',
  * /api/v1/auth/linkedin/auth/callback:
  *   get:
  *     summary: Handle LinkedIn authentication callback
- *     tags: [LinkedInAuth]
+ *     tags: 
+ *       - Authentication API endpoints
  *     description: Handles the callback from LinkedIn after the user has authenticated.
  *     responses:
  *       200:
@@ -673,7 +690,7 @@ router.get('/linkedin/auth',
  */
 router.get('/linkedin/auth/callback',
     verifyThirdPartyAuthToken,
-    linkedinCallback,
+    linkedinCallback
 );
 
 export default router;

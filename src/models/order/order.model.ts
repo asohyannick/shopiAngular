@@ -24,7 +24,7 @@ const orderSchema: Schema = new Schema<IOrder>({
     default: 'pending',
  },
  trackingNumber:{
-    type:String,
+    type: Number,
     required: false,
  },
 }, {timestamps: true});

@@ -3,13 +3,11 @@ import { IBlogType } from '../../types/blogType/blogType';
 const blogSchema: Schema = new Schema<IBlogType>({
  title:{
     type:String,
-    required: true,
     trim:true,
     minlength: 5,
  },
  content:{
     type:String,
-    required: true,
     minlength: 3,
     trim: true,
  },
@@ -17,6 +15,7 @@ const blogSchema: Schema = new Schema<IBlogType>({
    type:String,
    trim: true,
    unique: true,
+   required: true,
  },
  author:{
     type:Schema.Types.ObjectId,
@@ -24,7 +23,7 @@ const blogSchema: Schema = new Schema<IBlogType>({
  },
  tags:[{
     type: String,
-    required: true,
+    trim: true,
  }],
  date:{
     type:Date,
@@ -32,16 +31,16 @@ const blogSchema: Schema = new Schema<IBlogType>({
  },
  imageURLs:[{
    type: String,
-   required: true,
+   trim: true,
    default: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTia-QRwqDlV-poRCVRS0WNKIR_nmF4Mq80bg&s",
 }],
 excerpt:{
     type:String,
-    required: true,
+    trim: true,
 },
 published:{
     type:String,
-    required: true,
+    trim: true,
 },
 }, {timestamps: true});
 const Blog = mongoose.model<IBlogType>('Blog', blogSchema);

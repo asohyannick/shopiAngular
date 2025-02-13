@@ -78,7 +78,7 @@ router.get('/fetch-wishlist/:wishlistId',
 
 /**
  * @swagger
- * /api/v1/wishlist/update-wishlist/{wishlistId}:
+ * /api/v1/wishlist/update-wishlist/{id}:
  *   put:
  *     summary: Update a specific wishlist by ID (User must be authenticated)
  *     parameters:
@@ -100,14 +100,14 @@ router.get('/fetch-wishlist/:wishlistId',
  *       500:
  *         description: Internal server error. Unable to update wishlist.
  */
-router.put('/update-wishlist/:wishlistId', 
+router.put('/update-wishlist/:id', 
     verifyGeneralApplicationAuthenticationToken,
     updateWishList
 );
 
 /**
  * @swagger
- * /api/v1/wishlist/delete-wishlist/{wishlistId}:
+ * /api/v1/wishlist/delete-wishlist/{id}:
  *   delete:
  *     summary: Delete a specific wishlist by ID (User must be authenticated)
  *     parameters:
@@ -127,14 +127,14 @@ router.put('/update-wishlist/:wishlistId',
  *       500:
  *         description: Internal server error. Unable to delete wishlist.
  */
-router.delete('/delete-wishlist/:wishlistId',
+router.delete('/delete-wishlist/:id',
     verifyGeneralApplicationAuthenticationToken,
     deleteWishList
 );
 
 /**
  * @swagger
- * /api/v1/wishlist/share-wishlist:
+ * /api/v1/wishlist/share-wishlist/{id}:
  *   post:
  *     summary: Share a wishlist (User must be authenticated)
  *     responses:
@@ -147,7 +147,7 @@ router.delete('/delete-wishlist/:wishlistId',
  *       500:
  *         description: Internal server error. Unable to share wishlist.
  */
-router.post('/share-wishlist',
+router.post('/share-wishlist/:id',
     verifyGeneralApplicationAuthenticationToken,
     shareWishlist
 );

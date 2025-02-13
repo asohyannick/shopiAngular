@@ -32,6 +32,7 @@ const createPaymentIntent = async (req: Request, res: Response): Promise<Respons
         });
         await payment.save();
         return res.status(StatusCodes.CREATED).json({
+            success: true,
             message: "Stripe payment successful",
             clientSecret: paymentIntent.client_secret,
         });

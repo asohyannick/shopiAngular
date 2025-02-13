@@ -5,7 +5,7 @@ const swaggerOptions = {
     swaggerDefinition: {
         openapi: '3.0.0',
         info: {
-            title: 'Asoh Yannick Restful API developed with Node.js, Express.js, Typescript and MongoDB.',
+            title: 'urbanBazaar REST API developed and maintained by Asoh Yanick using Node.js, Express.js, Typescript and MongoDB',
             version: '1.0.0',
             description:'API Documentation',
         },

@@ -1,10 +1,11 @@
 import express from 'express';
 import { 
+    createOrder,
     createOrderHistory,
     fetchAllOrderHistories,
     updateOrderHistory,
     orderHistoryDetails,
-    fetchUserOrders,
+    fetchUserOrder,
     cancelAnOrder,
     orderHistory,
     deleteOrderHistory,
@@ -15,9 +16,72 @@ import {
 } from '../../middleware/auth/auth';
 
 const router = express.Router();
+
 /**
  * @swagger
- * /api/v1/order/create-orders:
+ * /api/v1/order/create-new-order:
+ *   post:
+ *     summary: Create a new order (User must be authenticated)
+ *     tags:
+ *       - Order
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: ID of the user placing the order.
+ *                 example: "67acd44e899a11f6cffc4d3d"
+ *               products:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     productId:
+ *                       type: string
+ *                       description: ID of the product.
+ *                       example: "67a21479d0d3bf9fe7bbd031"
+ *                     quantity:
+ *                       type: integer
+ *                       description: Quantity of the product.
+ *                       example: 2
+ *               status:
+ *                 type: string
+ *                 description: Current status of the order.
+ *                 enum: [pending, shipped, delivered, cancelled]
+ *                 example: "pending"
+ *               trackingNumber:
+ *                 type: string
+ *                 description: Tracking number for the order.
+ *                 example: "123456"
+ *     responses:
+ *       201:
+ *         description: Order created successfully.
+ *       400:
+ *         description: Bad request. Please check the input data.
+ *       401:
+ *         description: Unauthorized. User must be authenticated.
+ *       500:
+ *         description: Internal server error. Unable to create order.
+ */
+router.post('/create-new-order',
+    verifyGeneralApplicationAuthenticationToken,
+    createOrder
+);
+
+/**
+ * 
+ * @param {Request} req - The request object containing the order details.
+ * @param {Response} res - The response object to send back the API response.
+ * @returns {Promise<Response>} - A promise that resolves to the response object.
+ */
+
+/**
+ * @swagger
+ * /api/v1/order/create-order/{id}:
  *   post:
  *     summary: Create a new order (User must be authenticated)
  *     responses:
@@ -30,7 +94,7 @@ const router = express.Router();
  *       500:
  *         description: Internal server error. Unable to create order.
  */
-router.post('/create-orders',
+router.post('/create-order/:id',
     verifyGeneralApplicationAuthenticationToken,
     createOrderHistory
 );
@@ -118,7 +182,7 @@ router.get('/orders-detail/:id',
 
 /**
  * @swagger
- * /api/v1/order/fetch-orders/{userId}:
+ * /api/v1/order/fetch-orders/{id}:
  *   get:
  *     summary: Fetch all order histories for a specific user (User must be authenticated)
  *     parameters:
@@ -138,9 +202,9 @@ router.get('/orders-detail/:id',
  *       500:
  *         description: Internal server error. Unable to fetch order histories.
  */
-router.get('/fetch-orders/:userId',
+router.get('/fetch-orders/:id',
     verifyGeneralApplicationAuthenticationToken,
-    fetchUserOrders
+    fetchUserOrder
 );
 
 /**
@@ -203,7 +267,7 @@ router.post('/orders/:id/cancel',
 
 /**
  * @swagger
- * /api/v1/order/order-history/{historyId}:
+ * /api/v1/order/order-history/{id}:
  *   delete:
  *     summary: Delete a specific order history (User must be authenticated)
  *     parameters:
@@ -223,14 +287,14 @@ router.post('/orders/:id/cancel',
  *       500:
  *         description: Internal server error. Unable to delete order history.
  */
-router.delete('/order-history/:historyId',
+router.delete('/order-history/:id',
     verifyGeneralApplicationAuthenticationToken,
     deleteOrderHistory
 );
 
 /**
  * @swagger
- * /api/v1/order/orders/history/{userId}:
+ * /api/v1/order/orders/history/{id}:
  *   get:
  *     summary: Fetch past order history for a user (User must be authenticated)
  *     parameters:
@@ -250,7 +314,7 @@ router.delete('/order-history/:historyId',
  *       500:
  *         description: Internal server error. Unable to fetch past order history.
  */
-router.get('/orders/history/:userId',
+router.get('/orders/history/:id',
     verifyGeneralApplicationAuthenticationToken,
     pastOrder
 );

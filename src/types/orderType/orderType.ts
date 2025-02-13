@@ -6,12 +6,12 @@ export interface IOrder extends Document {
         quantity: number;
     }>;
     status: 'pending' | 'shipped' | 'delivered' | 'cancelled';
-    trackingNumber?: string;
+    trackingNumber?: number;
 }
 
 export interface IOrderHistory extends Document {
     orderId:Types.ObjectId;
-    status: string;
+    status: boolean;
     notes?: string;
     changedBy:Types.ObjectId;
     changeReason?: string;
