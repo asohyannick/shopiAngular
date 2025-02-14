@@ -2,7 +2,7 @@ import express from 'express';
 import { verifyGeneralApplicationAuthenticationToken } from '../../middleware/auth/auth';
 import { 
     createTestimonial, 
-    // uploadImages,
+    uploadTestimonialImages,
     fetchTestimonial, 
     fetchTestimonials,
     updateTestimonial,
@@ -45,9 +45,9 @@ const router = express.Router();
  *         description: Unauthorized
  */
 router.post('/create-testimonial',
-    schemaValidator('/testimonial/create-testimonial'),
     verifyGeneralApplicationAuthenticationToken,
-    // uploadImages,
+    schemaValidator('/testimonial/create-testimonial'),
+    uploadTestimonialImages,
     createTestimonial
 );
 

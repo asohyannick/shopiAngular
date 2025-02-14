@@ -66,7 +66,7 @@ const createWishList = async(req:Request, res:Response): Promise<Response> => {
 const fetchUserWishLists = async(req:Request, res:Response): Promise<Response> => {
    try {
       const wishLists = await WishListModel.find().populate('products');
-      return res.status(StatusCodes.CREATED).json({
+      return res.status(StatusCodes.OK).json({
         message: "Wishlists has been fetched successfully", 
         wishLists
     });
@@ -77,9 +77,9 @@ const fetchUserWishLists = async(req:Request, res:Response): Promise<Response> =
 } 
 
 const fetchUserWishList = async(req: Request, res:Response): Promise<Response> => {
-    const {wishlistId}  = req.params;
+    const { id }  = req.params;
     try {
-        const wishlist = await WishListModel.findById(wishlistId).populate('products');
+        const wishlist = await WishListModel.findById(id).populate('products');
        if (!wishlist) {
           return res.status(StatusCodes.NOT_FOUND).json({message: "Wishlist not found" });
        }

@@ -1,16 +1,13 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import Blog from "../../models/blog/blog.model";
-// import cloudinary from '../../config/cloudinaryConfig/cloudinaryConfig';
-// import compressImage from '../../utils/compressedImages/compressImage';
+import cloudinary from '../../config/cloudinaryConfig/cloudinaryConfig';
+import compressImage from '../../utils/compressedImages/compressImage';
 import multer from 'multer';
 import Comment from "../../models/comment/comment.model";
-// Define the expected structure of the Cloudinary response
-// interface CloudinaryUploadResponse {
-//     secure_url: string;
-//     // Include any other properties from the response you may need
-// }
-
+interface CloudinaryUploadResponse {
+   secure_url: string;
+}
 // Configure multer
 const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage: storage }); // Multer setup with memory storage
@@ -18,28 +15,29 @@ const upload = multer({ storage: storage }); // Multer setup with memory storage
 // Defining the upload images function
 const uploadImages = upload.array('imageURLs', 20);
 const createBlog = async(req:Request, res:Response): Promise<Response> => {
-const {title, content, author, email, tags, imageURLs,  excerpt, published } = req.body;
+const {title, content, author, email, tags,  excerpt, published } = req.body;
 
  if (!req.user || !req.user.isAdmin) {
     return res.status(StatusCodes.FORBIDDEN).json({ message: "You are not allowed to create a blog post" });
  }
 
  try {
-//    const files = req.files as Express.Multer.File[]; 
-//   if (!files || files.length === 0) {
-//     return res.status(StatusCodes.NOT_FOUND).json({ message: "No images provided" });
-//   }
-//    const uploadedImageURLs: string[] = []; 
-//   for (const file of files) {
-//     const compressedImage = await compressImage(file.buffer);
-//     const result = await new Promise<CloudinaryUploadResponse>((resolve, reject) => {
-//         const stream = cloudinary.uploader.upload_stream((error, result) => {
-//             if (error) reject(error);
-//             else resolve(result as CloudinaryUploadResponse);
-//         });
-//         stream.end(compressedImage); 
-//     });
-//     uploadedImageURLs.push(result.secure_url);
+   const files = req.files as Express.Multer.File[] | undefined;
+  if (!files || files.length === 0) {
+    return res.status(StatusCodes.NOT_FOUND).json({ message: "No images provided" });
+  }
+  const uploadedImageURLs: string[] = []; 
+for (const file of files) {
+    const compressedImage = await compressImage(file.buffer);
+    const result = await new Promise<CloudinaryUploadResponse>((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream((error, result) => {
+            if (error) reject(error);
+            else resolve(result as CloudinaryUploadResponse);
+        });
+        stream.end(compressedImage); 
+    });
+   uploadedImageURLs.push(result.secure_url);
+}
     const newBlog = new Blog({
       title,
       content,
@@ -47,18 +45,32 @@ const {title, content, author, email, tags, imageURLs,  excerpt, published } = r
       author,
       tags,
       date: Date.now(),
-      // imageURLs: uploadedImageURLs,
-      imageURLs,
+      imageURLs: uploadedImageURLs,
       excerpt,
       published
     });
     await newBlog.save();
-    return res.status(StatusCodes.CREATED).json({message:"Blog post has been created successfully", newBlog});
+    return res.status(StatusCodes.CREATED).json({
+      success: true,
+      message:"Blog post has been created successfully", 
+      newBlog});
  } catch (error) {
     console.error("Error occurred while creating a blog post", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });
  }
+ 
 }
+
+const uploadBlogImages = (req: Request, res: Response, next: () => void) => {
+    uploadImages(req, res, (err) => {
+        console.error("Upload Error:", err);
+        if (err) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Image upload failed", error: err });
+        }
+        console.log('Uploaded files:', req.files); // Check the uploaded files
+        next();
+    });
+};
 
 const fetchBlogs = async(req:Request, res:Response): Promise<Response> => {
     if (!req.user || !req.user.isAdmin) {
@@ -135,6 +147,7 @@ const subscribe = async(req:Request, res:Response): Promise<Response> => {
    });
    await newSubscription.save();
    return res.status(StatusCodes.CREATED).json({
+      sucess: true,
       message: "Subscription successful", 
       subscription: newSubscription
    })
@@ -154,8 +167,9 @@ const createComment = async(req:Request, res:Response): Promise<Response> => {
    });
    await newComment.save();
    return res.status(StatusCodes.CREATED).json({
+      success: true,
       message: "Comment has been created successfully", 
-      comment: newComment
+      newComment
    });
   } catch (error) {
    console.error("Error occurred while creating a comment", error);
@@ -218,7 +232,7 @@ const removeComment = async(req:Request, res:Response): Promise<Response> => {
 
 export {
    createBlog,
-   uploadImages,
+   uploadBlogImages,
    fetchBlogs,
    fetchBlog,
    updateBlog,

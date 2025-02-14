@@ -14,5 +14,4 @@ const generatePDF = (data:any, title: string): Buffer => {
  doc.end();
  return Buffer.concat(buffers);
 }
-
 export default generatePDF;

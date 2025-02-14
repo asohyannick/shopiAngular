@@ -43,10 +43,7 @@ const fetchChat = async(req: Request, res: Response): Promise<Response> => {
     if (!req.params || !req.params.id) {
         return res.status(StatusCodes.BAD_REQUEST).json({ message: "Chat ID is required" });
     }
-    
     const { id } = req.params;
-    console.log("Fetching chat with ID:", id);
-
     try {
         const retrieveChat = await ChatRoomModel.findById(id).populate("senderId", "firstName lastName");
         if (!retrieveChat) {
@@ -143,7 +140,10 @@ const likeMessage = async(req:Request, res:Response): Promise<Response> => {
      // Emit the chat like event
     io.emit('likeChat', chatMessage);
    //  await sendPushNotifications(res, `Hello=${chatMessage.senderId}`, `User ${userId} liked your chat: ${chatMessage}`);
-    return res.status(StatusCodes.OK).json({message: "You have just liked this message successfully", chatMessage});
+    return res.status(StatusCodes.OK).json({
+        message: "You have just liked this message successfully", 
+        chatMessage
+    });
  } catch (error) {
     console.log("Error occur while liking a chat message", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({message: "Something went wrong"});

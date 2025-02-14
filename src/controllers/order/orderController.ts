@@ -20,7 +20,11 @@ const createOrder = async(req:Request, res:Response): Promise<Response> => {
       trackingNumber
     });
     await createOrder.save();
-    return res.status(StatusCodes.CREATED).json({message: "Order has been created successfully", createOrder});
+    return res.status(StatusCodes.CREATED).json({
+      success: true,
+      message: "Order has been created successfully", 
+      createOrder
+    });
   } catch(error) {
   console.error("Error occurred while creating an order", error);
   return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" }); 

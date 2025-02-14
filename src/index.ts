@@ -58,7 +58,6 @@ app.use(cors({
   origin: process.env.FRONTEND_URL as string,
   credentials: true,
 }));
-
 app.use(limiter);
 app.use(rateLimiterMiddleware);
 app.use(`/api/${process.env.API_VERSION}/auth`, authRoute);

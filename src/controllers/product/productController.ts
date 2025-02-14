@@ -1,21 +1,20 @@
 import { Request, Response } from 'express';
-// import multer  from 'multer';
+import multer  from 'multer';
 import { StatusCodes } from 'http-status-codes';
 import ProductModel from "../../models/product/product.model";
 // import { sendPushNotifications } from '../notificationManager/notificationController';
 import { ReviewType } from '../../types/productType/productType';
 import mongoose from 'mongoose';
-// import cloudinary from '../../config/cloudinaryConfig/cloudinaryConfig';
+import cloudinary from '../../config/cloudinaryConfig/cloudinaryConfig';
 import { ParsedQs } from 'qs';
-// import { CloudinaryStorage } from 'multer-storage-cloudinary';
-// Configure multer storage
-// const storage = new CloudinaryStorage({
-    // cloudinary: cloudinary,
-    // params: {},
-// });
-// const upload = multer({ storage }).array('imageURLs', 20);
+import compressImage from '../../utils/compressedImages/compressImage';
+interface CloudinaryUploadResponse {
+    secure_url: string;
+}
+const storage = multer.memoryStorage(); // Store files in memory
+const upload = multer({ storage: storage }); // Multer setup with memory storage
+const uploadImages = upload.array('imageURLs', 20);
 const createProduct = async (req: Request, res: Response): Promise<Response> => {
-
     const {
         name,
         description,
@@ -26,7 +25,6 @@ const createProduct = async (req: Request, res: Response): Promise<Response> => 
         rating,
         posted_Date,
         brand,
-        imageURLs,
         specifications,
         duration,
         isFeatured,
@@ -38,16 +36,23 @@ const createProduct = async (req: Request, res: Response): Promise<Response> => 
         customerReviews,
         producers,
     } = req.body;
-
-    if (!req.user || !req.user.isAdmin) {
-        return res.status(StatusCodes.FORBIDDEN).json({ message: "You are not allowed to create a product" });
-    }
     try {
-        // const files = req.files as Express.Multer.File[] | undefined;
-        // if (!files || files.length === 0) {
-            // return res.status(StatusCodes.BAD_REQUEST).json({ message: "No files uploaded" });
-        // }
-        // const imageUrls = files.map(file => file.path); 
+        const files = req.files as Express.Multer.File[] | undefined;
+        if (!files || files.length === 0) {
+          return res.status(StatusCodes.NOT_FOUND).json({ message: "No images provided" });
+        }
+        const uploadedImageURLs: string[] = []; 
+        for (const file of files) {
+          const compressedImage = await compressImage(file.buffer);
+          const result = await new Promise<CloudinaryUploadResponse>((resolve, reject) => {
+           const stream = cloudinary.uploader.upload_stream((error, result) => {
+            if (error) reject(error);
+            else resolve(result as CloudinaryUploadResponse);
+          });
+          stream.end(compressedImage); 
+          });
+          uploadedImageURLs.push(result.secure_url);
+        }
         const newProduct = new ProductModel({
             name,
             description,
@@ -58,7 +63,7 @@ const createProduct = async (req: Request, res: Response): Promise<Response> => 
             rating,
             posted_Date,
             brand,
-            imageURLs,
+            imageURLs: uploadedImageURLs, 
             specifications,
             duration,
             isFeatured,
@@ -74,8 +79,9 @@ const createProduct = async (req: Request, res: Response): Promise<Response> => 
         await newProduct.save();
         // await sendPushNotifications(res, 'New Product Alert', `Check out our new products ${newProduct.name}`);
         return res.status(StatusCodes.CREATED).json({
+            success: true,
             message: "Product has been created successfully!",
-            data: newProduct,
+            newProduct,
         });
     } catch (error) {
         console.error("Error occurred while creating a product", error);
@@ -83,16 +89,16 @@ const createProduct = async (req: Request, res: Response): Promise<Response> => 
     }
 };
 
-// const uploadProductImages = (req: Request, res: Response, next: () => void) => {
-    // upload(req, res, (err) => {
-        // console.error("Upload Error:", err);
-        // if (err) {
-            // return res.status(StatusCodes.BAD_REQUEST).json({ message: "Image upload failed", error: err });
-        // }
-        // console.log('Uploaded files:', req.files); // Check the uploaded files
-        // next();
-    // });
-// };
+const uploadProductImages = (req: Request, res: Response, next: () => void) => {
+    uploadImages(req, res, (err) => {
+        console.error("Upload Error:", err);
+        if (err) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Image upload failed", error: err });
+        }
+        console.log('Uploaded files:', req.files); // Check the uploaded files
+        next();
+    });
+};
 
 const fetchAllProducts = async(req:Request, res:Response): Promise<Response> => {
     const {page = 1, limit = 12} = req.query;
@@ -100,14 +106,14 @@ const fetchAllProducts = async(req:Request, res:Response): Promise<Response> => 
        return res.status(StatusCodes.FORBIDDEN).json({message: "You are not allowed to fetch all products"})
    }
     try {
-        const fetchProducts = await ProductModel.find().skip((Number(page) - 1)  *    Number(limit)).limit(Number(limit));
+        const fetchProducts = await ProductModel.find().skip((Number(page) - 1)  *  Number(limit)).limit(Number(limit));
         const totalImages = await ProductModel.countDocuments();
         return res.status(StatusCodes.OK).json({
             message:"Products have been fetch successfully!",
             fetchProducts: Math.ceil(totalImages / Number(limit)), // Fetch Products and images lazily before presenting them to the client
             currentPage: Number(page),
             fetchGood: fetchProducts
-        })
+        });
     } catch (error) {
         console.log("Error occur while fetching all products from the database...", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({message: "Something went wrong"});
@@ -115,11 +121,12 @@ const fetchAllProducts = async(req:Request, res:Response): Promise<Response> => 
 }
 
 const fetchProduct = async(req:Request, res:Response): Promise<Response> => {
+    const { id } = req.params;
     try {
         if (!req.user || !req.user.isAdmin) {
             return res.status(StatusCodes.FORBIDDEN).json({message: "You are not allowed to fetch  a product"})
         }
-        const fetchOneProduct = await ProductModel.findById(req.params.id);
+        const fetchOneProduct = await ProductModel.findById(id);
         if(!fetchOneProduct) {
             return res.status(StatusCodes.NOT_FOUND).json({message: "Product does not exist"});
         }
@@ -137,8 +144,9 @@ const updateProduct = async(req:Request, res:Response): Promise<Response> => {
     if (!req.user || !req.user.isAdmin) {
         return res.status(StatusCodes.FORBIDDEN).json({message: "You are not allowed to update a product"})
     }
+    const { id } = req.params;
     try {
-        const updateOneProduct = await ProductModel.findByIdAndUpdate(req.params.id);
+        const updateOneProduct = await ProductModel.findByIdAndUpdate(id);
         if(!updateOneProduct) {
             return res.status(StatusCodes.NOT_FOUND).json({
                 message: "Product does not exist",
@@ -159,8 +167,9 @@ const deleteProduct = async(req:Request, res: Response): Promise<Response> => {
     if (!req.user || !req.user.isAdmin) {
     return res.status(StatusCodes.FORBIDDEN).json({message: "You are not allowed to delete a product"})
  }
+   const { id } = req.params;
    try {
-      const deleteOneProduct = await ProductModel.findByIdAndDelete(req.params.id);
+      const deleteOneProduct = await ProductModel.findByIdAndDelete(id);
       if(!deleteOneProduct) {
             return res.status(StatusCodes.NOT_FOUND).json({message: "Product does not exist"});
       }
@@ -296,10 +305,10 @@ const searchProducts = async (req: Request<{}, {}, {}, ParsedQs>, res: Response)
 }
 
 const createReview = async(req:Request, res:Response): Promise<Response> => {
-    const { productId } = req.params;
+    const { id } = req.params;
     const {username, reviewText, rating } = req.body;
     try {
-        const product = await ProductModel.findById(productId);
+        const product = await ProductModel.findById(id);
         if (!product) {
             return res.status(StatusCodes.NOT_FOUND).json({message: "Product not found"});
         }
@@ -324,9 +333,9 @@ const createReview = async(req:Request, res:Response): Promise<Response> => {
 }
 
 const fetchAllReviews = async(req:Request, res:Response): Promise<Response> => {
-    const {productId } = req.params;
+    const { id } = req.params;
   try {
-    const product = await ProductModel.findById(productId);
+    const product = await ProductModel.findById(id);
     if (!product) {
         return res.status(StatusCodes.NOT_FOUND).json({message: "Product not found"});
     }
@@ -341,18 +350,17 @@ const fetchAllReviews = async(req:Request, res:Response): Promise<Response> => {
 }
 
 const fetchReview = async(req:Request, res:Response): Promise<Response> => {
-    const { productId, reviewId } = req.params;
+    const { id, reviewId } = req.params;
     try {
-        const product = await ProductModel.findById(productId);
+        const product = await ProductModel.findById(id);
         if (!product) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: "Product not found "});
         }
-        // Use the _id property to find the specific review
-    const review = product.customerReviews.find((review) => review._id.toString() === reviewId);
-    if (!review) {
-        return res.status(StatusCodes.NOT_FOUND).json({message: "Review not found" });
-    }
-    return res.status(StatusCodes.OK).json({message: "Review have been fetched successfully.", review });
+        const review = product.customerReviews.find((review) => review._id.toString() === reviewId);
+        if (!review) {
+          return res.status(StatusCodes.NOT_FOUND).json({message: "Review not found" });
+        }
+        return res.status(StatusCodes.OK).json({message: "Review have been fetched successfully.", review });
     } catch (error) {
        console.error("Error occurred while fetching a review", error);
        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });  
@@ -360,10 +368,10 @@ const fetchReview = async(req:Request, res:Response): Promise<Response> => {
 }
 
 const updateReview = async(req: Request, res:Response): Promise<Response> => {
-    const { productId, reviewId } = req.params;
+    const { id, reviewId } = req.params;
     const { reviewText, rating } = req.body;
     try {
-        const product = await ProductModel.findById(productId);
+        const product = await ProductModel.findById(id);
         if (!product) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: "Product not found" });
         }
@@ -384,14 +392,12 @@ const updateReview = async(req: Request, res:Response): Promise<Response> => {
 }
 
 const deleteReview = async(req: Request, res:Response) => {
-    const { productId, reviewId } = req.params;
+    const { id, reviewId } = req.params;
  try {
-    const product = await ProductModel.findById(productId);
+    const product = await ProductModel.findById(id);
     if (!product) {
         return res.status(StatusCodes.NOT_FOUND).json({message: "Product not found"});
     }
-        // Use the _id property to find the specific review
-        // Find the index of the review to delete
     const reviewIndex = product.customerReviews.findIndex((review) => review._id.toString() === reviewId);
     if (reviewIndex === -1) {
             return res.status(404).json({ message: 'Review not found' });
@@ -406,7 +412,7 @@ const deleteReview = async(req: Request, res:Response) => {
 }
 
 export {
-    // uploadProductImages,
+    uploadProductImages,
     createProduct,
     fetchAllProducts,
     fetchProduct,

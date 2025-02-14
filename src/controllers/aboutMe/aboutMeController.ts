@@ -25,7 +25,11 @@ try {
         contactInfo
     });
     await newProfile.save();
-    return res.status(StatusCodes.CREATED).json({message: "Profile has been created successfully.", newProfile});
+    return res.status(StatusCodes.CREATED).json({
+        success: true,
+        message: "Profile has been created successfully.", 
+        newProfile
+    });
 } catch (error) {
     console.log("Error occur while creating a profile", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({message: "Something went wrong"});
@@ -57,7 +61,7 @@ try {
 }
 
 const updateProfile = async(req:Request, res:Response): Promise<Response> => {
-    const { id } = req.params;
+ const { id } = req.params;
 try {
     const profile = await AboutMe.findByIdAndUpdate(id, req.body, {new: true});
     if(!profile) {

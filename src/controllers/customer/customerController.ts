@@ -14,6 +14,9 @@ const createCustomer = async(req:Request, res:Response): Promise<Response> => {
         address,
         dateOfBirth
     } = req.body;
+    if (!req.user || !req.user.isAdmin) {
+        return res.status(StatusCodes.FORBIDDEN).json({ message: "You are not allowed to create a customer" });
+    }
   try {
     let customer = await Customer.findOne({email});
     if (customer) {
@@ -36,8 +39,9 @@ const createCustomer = async(req:Request, res:Response): Promise<Response> => {
     });
     res.cookie('auth_token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 86400000
+      secure: process.env.NODE_ENV as string === 'production',
+      maxAge: 86400000,
+      sameSite: "strict"
     });
     return res.status(StatusCodes.CREATED).json({
         message: "Customer has been created successfully.", 
@@ -67,8 +71,9 @@ const customerLogin = async(req:Request, res:Response): Promise<Response> => {
     });
     res.cookie('auth_token', token, {
      httpOnly: true,
-     secure: process.env.NODE_ENV === 'production',
+     secure: process.env.NODE_ENV as string === 'production',
      maxAge: 86400000,
+     sameSite: "strict"
     });
     return res.status(StatusCodes.OK).json({
       message: "Customer has been sign in successfully",

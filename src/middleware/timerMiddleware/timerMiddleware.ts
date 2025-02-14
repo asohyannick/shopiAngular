@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-
 let requestCount: number = 0;
 let startTime: Date | null = null;
 let timerStarted: boolean = false; // Flag to prevent multiple timers
@@ -16,7 +15,6 @@ const trackIncomingRequest = (req: Request, res: Response, next: NextFunction) =
                 const currentTime = new Date();
                 const elapsedTime = (currentTime.getTime() - startTime.getTime()) / (1000 * 60); // in minutes
                 console.log(`Requests received in the last ${elapsedTime.toFixed(2)} minutes: ${requestCount}`);
-                
                 // Reset the count and start time for the next interval
                 requestCount = 0;
                 startTime = new Date();

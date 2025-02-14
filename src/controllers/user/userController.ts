@@ -65,8 +65,9 @@ const {id} = req.params;
 
 const activateUserAccount = async(req:Request, res:Response): Promise<Response> => {
     const {active } = req.body;
+    const { id } = req.params;
 try { 
-    const user = await Auth.findByIdAndUpdate(req.params.id, {active}, {new: true});
+    const user = await Auth.findByIdAndUpdate(id, {active}, {new: true});
     if(!user) {
        return res.status(StatusCodes.NOT_FOUND).json({message: "User account not found"});
     }
@@ -111,8 +112,8 @@ const updateUsersInBulk = async(req:Request, res:Response): Promise<Response> =>
         });
         const updateUsers = await Promise.all(updatePromises);
         return res.status(StatusCodes.OK).json({
-        message: "Users have been updated successfully!", 
-       updateUsers
+        message: "Users have been updated in bulk successfully!", 
+        updateUsers
     });
 } catch (error) {
     console.error("Error occurred while updating authenticated user's accounts", error);
@@ -126,6 +127,7 @@ try {
     const newLog = new ActivityLog({userId, action, details});
     await newLog.save();
     return res.status(StatusCodes.CREATED).json({
+      success: true,
       message: "User activity has been created successfully!", 
       newLog
     });
@@ -194,7 +196,7 @@ const deleteUserLogActivity = async(req:Request, res:Response): Promise<Response
     }
     return res.status(StatusCodes.OK).json({
       message: "User activity log has been deleted successfully!", 
-     deleteUserLog
+      deleteUserLog
     }); 
   } catch(error) {
     console.error("Error occurred while deleting the activity log of an authenticated user's account", error);
@@ -204,13 +206,11 @@ const deleteUserLogActivity = async(req:Request, res:Response): Promise<Response
 
 const adminRequestToResetAUserPassword = async (req: Request, res: Response): Promise<Response> => {
     const { email } = req.body;
-    console.log("Searching for user with email:", email);
     try {
         const user = await Auth.findOne({ email });
         if (!user) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
         }
-
         const twoFactorSecret = user.twoFactorSecret || speakeasy.generateSecret({ length: 20 }).base32;
         if (!user.twoFactorSecret) {
             user.twoFactorSecret = twoFactorSecret; // Save the new secret to the user
@@ -259,7 +259,6 @@ const adminResetNewUserPassword = async (req: Request, res: Response): Promise<R
     const { newPassword, twoFactorCode } = req.body; // Incoming 2FA code from user
     const { token } = req.params; // JWT token
     console.log("Received token:", token);
-
     try {
         // Verify the token
         const decoded: any = jwt.verify(token, process.env.JWT_SECRET_KEY as string);

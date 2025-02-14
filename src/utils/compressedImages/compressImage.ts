@@ -12,6 +12,5 @@ const compressImage = async(buffer: Buffer, format: 'jpeg' | 'png' = 'jpeg'): Pr
     }
 
 }
-
 export default compressImage;
 

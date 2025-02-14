@@ -1,17 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { RateLimiterMemory } from 'rate-limiter-flexible';
-
 // Configure rate limiter with in-memory store
 const rateLimiterMemory = new RateLimiterMemory({
     points: 10, // Number of points
     duration: 1, // Per second
 });
-
 // Rate limiter middleware function
 const rateLimiterMiddleware = (req: Request, res: Response, next: NextFunction): void => {
     const ip = req.ip; // Extract IP address
-
     if (ip) { // Check if IP is defined
         rateLimiterMemory.consume(ip)
             .then(() => {

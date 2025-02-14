@@ -16,7 +16,11 @@ const createFAQs = async(req:Request, res:Response): Promise<Response> => {
         isActive
     });
     await newFAQ.save();
-    return res.status(StatusCodes.CREATED).json({message: "FAQ has been created successfully", newFAQ});
+    return res.status(StatusCodes.CREATED).json({
+      success: true,
+      message: "FAQ has been created successfully", 
+      newFAQ
+   });
    } catch(error) {
     console.error("Error occurred while creating an FAQ", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });

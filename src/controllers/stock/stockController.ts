@@ -172,7 +172,7 @@ const reorderStock = async (req: Request, res: Response): Promise<Response> => {
 
 const getStockByProduct = async(req:Request, res:Response):Promise<Response> => {
     if (!req.user || !req.user.isAdmin) {
-    return res.status(StatusCodes.FORBIDDEN).json({message: "You are not allowed to fetch stock by product product"});
+    return res.status(StatusCodes.FORBIDDEN).json({message: "You are not allowed to fetch stock by product"});
  }
     const { id } = req.params;
   try {

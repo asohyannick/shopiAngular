@@ -2,25 +2,18 @@ import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import Testimonial from "../../models/testimonial/testimonail.model";
 import { ITestimonailStatus } from "../../types/testimonialType/testimonialType";
-// import multer from 'multer';
-// import cloudinary from '../../config/cloudinaryConfig/cloudinaryConfig';
-// import compressImage from '../../utils/compressedImages/compressImage';
-
-// interface CloudinaryUploadResponse {
-    // secure_url: string;
-// }
-// 
-// Configure multer
-// const storage = multer.memoryStorage(); // Store files in memory
-// const upload = multer({ storage: storage }); // Multer setup with memory storage
-
-// // Defining the upload images function
-// const uploadImages = upload.array('profileImage', 20);
-
+import multer from 'multer';
+import cloudinary from '../../config/cloudinaryConfig/cloudinaryConfig';
+import compressImage from '../../utils/compressedImages/compressImage';
+interface CloudinaryUploadResponse {
+    secure_url: string;
+}
+const storage = multer.memoryStorage(); // Store files in memory
+const upload = multer({ storage: storage }); // Multer setup with memory storage
+const uploadImages = upload.array('profileImage', 20);
 const createTestimonial = async(req:Request, res:Response): Promise<Response> => {
     const {
         userId, 
-        profileImage,
         title, 
         name, 
         message, 
@@ -28,26 +21,25 @@ const createTestimonial = async(req:Request, res:Response): Promise<Response> =>
         continent
     } = req.body;
  try {
-//     const files = req.files as Express.Multer.File[];
-//  if (!files || files.length === 0) {
-//      return res.status(StatusCodes.NOT_FOUND).json({ message: "No images provided" });
-//  }
-//  const uploadedImageURLs: string[] = []; 
-//  for (const file of files) {
-//      const compressedImage = await compressImage(file.buffer);
-//      const result = await new Promise<CloudinaryUploadResponse>((resolve, reject) => {
-//          const stream = cloudinary.uploader.upload_stream((error, result) => {
-//              if (error) reject(error);
-//              else resolve(result as CloudinaryUploadResponse);
-//          });
-//          stream.end(compressedImage); 
-//      });
-//      // Ensure the result has a secure_url
-//      uploadedImageURLs.push(result.secure_url);
-//  }
+ const files = req.files as Express.Multer.File[] | undefined;
+ if (!files || files.length === 0) {
+     return res.status(StatusCodes.NOT_FOUND).json({ message: "No images provided" });
+ }
+ const uploadedImageURLs: string[] = []; 
+ for (const file of files) {
+     const compressedImage = await compressImage(file.buffer);
+     const result = await new Promise<CloudinaryUploadResponse>((resolve, reject) => {
+         const stream = cloudinary.uploader.upload_stream((error, result) => {
+             if (error) reject(error);
+             else resolve(result as CloudinaryUploadResponse);
+         });
+         stream.end(compressedImage); 
+     });
+    uploadedImageURLs.push(result.secure_url);
+ }
     const newTestimonial = new Testimonial({
         userId,
-        profileImage,
+        profileImage: uploadedImageURLs,
         name,
         title,
         message,
@@ -67,6 +59,17 @@ const createTestimonial = async(req:Request, res:Response): Promise<Response> =>
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });
  }
 }
+
+const uploadTestimonialImages = (req: Request, res: Response, next: () => void) => {
+    uploadImages(req, res, (err) => {
+        console.error("Upload Error:", err);
+        if (err) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Image upload failed", error: err });
+        }
+        console.log('Uploaded files:', req.files); // Check the uploaded files
+        next();
+    });
+};
 
 const fetchTestimonials = async(req:Request, res:Response): Promise<Response> => {
   try { 
@@ -134,7 +137,7 @@ const removeTestimonial = async(req:Request, res:Response): Promise<Response> =>
 
 export {
     createTestimonial,
-    // uploadImages,
+    uploadTestimonialImages,
     fetchTestimonials,
     fetchTestimonial,
     updateTestimonial,

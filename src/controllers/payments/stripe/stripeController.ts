@@ -12,7 +12,6 @@ const createPaymentIntent = async (req: Request, res: Response): Promise<Respons
     try {
         // Validate request body
         const { amount, currency } = req.body;
-
         if (!amount || !currency || !Object.values(Currency).includes(currency)) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "Valid amount and currency are required." });
         }
@@ -33,6 +32,7 @@ const createPaymentIntent = async (req: Request, res: Response): Promise<Respons
         await payment.save();
         return res.status(StatusCodes.CREATED).json({
             success: true,
+            status: PaymentStatus.SUCCESS,
             message: "Stripe payment successful",
             clientSecret: paymentIntent.client_secret,
         });

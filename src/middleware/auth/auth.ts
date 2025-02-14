@@ -21,7 +21,7 @@ declare global {
 }
 
 const verifyGeneralApplicationAuthenticationToken = (req: Request, res: Response, next: NextFunction) => {
-    const token = req.cookies["auth_token"]; // Adjust based on your token storage
+    const token = req.cookies["auth_token"];
     if (!token) {
         return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Access Denied!" });
     }
@@ -38,12 +38,10 @@ const verifyGeneralApplicationAuthenticationToken = (req: Request, res: Response
 };
 
 const verifySuperAdminToken = (req: Request, res: Response, next: NextFunction) => {
-    const token = req.cookies["admin_token"]; // Adjust based on your token storage
-    // Check if the token exists
+    const token = req.cookies["admin_token"];
     if (!token) {
         return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Access denied." });
     }
-
     try {
         // Verify the token
         const decoded = jwt.verify(token, process.env.SUPER_ADMIN_TOKEN as string) as CustomJwtPayload; // Cast to your defined type
@@ -75,7 +73,7 @@ next: NextFunction) => {
     next();
 };
 
-// check  and validate the token to grant access to the user to login using their github account
+// check  and validate the token to grant access to the user to login using their social media account such as linkedin, facebook, google, instagram among others
 const verifyThirdPartyAuthToken = (req:Request, res:Response, next: NextFunction) => {
    const token = req.cookies['auth_token'];
    if (!token) {

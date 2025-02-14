@@ -16,6 +16,7 @@ const createFeedback = async(req:Request, res:Response): Promise<Response> => {
     });
     await newFeedback.save();
     return res.status(StatusCodes.CREATED).json({
+        success: true,
         message: "Your feedback has been received successfully. We are very happy to received your message",
         newFeedback
     });

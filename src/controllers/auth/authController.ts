@@ -40,7 +40,7 @@ const registerAccount = async (req: Request, res: Response) => {
             user.refreshToken = ''; // cancel all existing refresh tokens for the previously registered user
             await user.save();
             return res.status(StatusCodes.BAD_REQUEST).json({
-             message: "User already exists. Existing refresh token has been cancelled" });
+            message: "User already exists. Your existing refresh token has been cancelled" });
         }
 
         // Create a new user instance
@@ -60,7 +60,8 @@ const registerAccount = async (req: Request, res: Response) => {
         res.cookie("auth_token", accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV as string === "production",
-            maxAge: 900000 // 15 minutes 
+            maxAge: 900000, //  Access token expires in 15 minutes 
+            sameSite: "strict"
         });
 
         // Respond with success message and tokens
@@ -90,10 +91,10 @@ const refreshAccessToken = async(req:Request, res:Response): Promise<Response> =
     }
 
     // create a new access token and sent it to the user
-    const accessToken = jwt.sign({userId: user.id}, process.env.JWT_SECRET_KEY as string, {
+    const newAccessToken = jwt.sign({userId: user.id}, process.env.JWT_SECRET_KEY as string, {
         expiresIn: '15m'
     })
-    return res.status(StatusCodes.OK).json({message: "New access token retrieved successfully.", accessToken});
+    return res.status(StatusCodes.OK).json({message: "New access token has been retrieved successfully.", newAccessToken});
  } catch(error) {
     console.error("Registration error:", error); // More context in error logs
    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong." });
@@ -124,7 +125,8 @@ const loginAccount = async (req: Request, res: Response) => {
         res.cookie("auth_token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV as string  === "production",
-            maxAge: 86400000 // 1 day
+            maxAge: 86400000, // 1 day
+            sameSite: "strict"
         });
 
         // Respond with a structured message
@@ -160,8 +162,9 @@ const fetchAllAccounts = async (req: Request, res: Response): Promise<Response> 
 
 // fetch an account
 const fetchAnAccount = async (req: Request, res: Response): Promise<Response> => {
+    const { id } = req.params;
     try {
-        const user = await Auth.findById(req.params.id);
+        const user = await Auth.findById(id);
         if (!user) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
         }
@@ -177,10 +180,11 @@ const fetchAnAccount = async (req: Request, res: Response): Promise<Response> =>
 
 // update account
 const updateAccount = async (req: Request, res: Response): Promise<Response> => {
+    const { id } = req.params;
     const { firstName, lastName, email, password } = req.body;
     try {
         const updatedAccount = await Auth.findByIdAndUpdate(
-            req.params.id,
+            id,
             { firstName, lastName, email, password },
             { new: true, runValidators: true }
         );
@@ -199,8 +203,9 @@ const updateAccount = async (req: Request, res: Response): Promise<Response> => 
 
 // delete user account
 const deleteAccount = async (req: Request, res: Response): Promise<Response> => {
+      const { id } = req.params;
     try {
-        const deletedAccount = await Auth.findByIdAndDelete(req.params.id);
+        const deletedAccount = await Auth.findByIdAndDelete(id);
         if (!deletedAccount) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
         }
@@ -221,7 +226,7 @@ const userLogout = async(req: Request, res: Response): Promise<Response> => {
         res.cookie("auth_token", "", {
             expires: new Date(0),
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: process.env.NODE_ENV as string === "production",
             sameSite: "strict"
         });
         return res.status(StatusCodes.OK).json({ message: "User has been logged out successfully" });
@@ -263,13 +268,12 @@ const signUpAdmin = async (req: Request, res: Response): Promise<Response> => {
         const refreshToken = jwt.sign(
             {id: newAdmin._id, email: newAdmin.email, isAdmin: newAdmin.isAdmin },
             process.env.SUPER_ADMIN_TOKEN as string , { expiresIn: "7d"})
-            console.log("Access Token", accessToken);
-            console.log("Refresh Token", refreshToken);
         // Set the cookie,
         res.cookie("admin_token", accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV as string === "production",
-            maxAge: 900000 // Expire in 15 minutes
+            maxAge: 900000, // Expire in 15 minutes
+            sameSite: "strict"
         });
 
         return res.status(StatusCodes.CREATED).json({ 
@@ -291,12 +295,10 @@ const adminRefreshToken = async(req:Request, res:Response): Promise<Response> =>
         return res.status(StatusCodes.UNAUTHORIZED).json({message: "Invalid credentials"})
     }
     try {
-        console.log("Verifying refresh token:", refreshToken); // Log the incoming refresh token
       // Verify the refresh token
        const adminPayload = jwt.verify(refreshToken, process.env.SUPER_ADMIN_TOKEN as string) as JwtPayload;
        const adminUser = await Auth.findById(adminPayload.id);
        if (!adminUser) {
-        console.log("Admin user not found for ID:", adminPayload.id); // Log if user not found
          return res.status(StatusCodes.UNAUTHORIZED).json({message: "Invalid credentials"});
         }  
         // create a new access token and sent it to the user
@@ -352,7 +354,8 @@ const signInAdmin = async(req:Request, res:Response) => {
         res.cookie("admin_token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV as string === "production",
-            maxAge: 86400000 // 1 day
+            maxAge: 86400000, // 1 day
+            sameSite: "strict"
         });
 
         // Respond with a structured message
@@ -387,11 +390,11 @@ const adminUpdateAccount = async(req:Request, res:Response): Promise<Response> =
     const { isAdmin } = req.body;
     const { id } = req.params;
  try{
-    const user = await Auth.findByIdAndUpdate(id, {isAdmin}, {new: true});
-    if(!user) {
+    const admin = await Auth.findByIdAndUpdate(id, {isAdmin}, {new: true});
+    if(!admin) {
         return res.status(StatusCodes.NOT_FOUND).json({message: "Admin not found"});
     }
-    return res.status(StatusCodes.OK).json({message: "Admin has been updated successfully!", user});
+    return res.status(StatusCodes.OK).json({message: "Admin has been updated successfully!", admin});
  } catch(error) {
     console.error("Error occurred whiling updating admin account:", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong." });
@@ -465,9 +468,8 @@ const requestPasswordReset = async (req: Request, res: Response): Promise<Respon
         await user.save();
 
         // Create the reset link with the token
-        const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+        const resetLink = `${process.env.FRONTEND_URL as string }/reset-password/${resetToken}`;
         console.log(`Reset link: ${resetLink}`);
-
         // Send the password reset email
         await sendPasswordResetEmail(user.email, resetLink, twoFACode);
         return res.status(StatusCodes.OK).json({ message: "Verification code and reset link sent: Please check your email." });

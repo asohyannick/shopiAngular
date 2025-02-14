@@ -6,7 +6,7 @@ import {
 } from '../../middleware/auth/auth';
 import { 
     createBlog, 
-    // uploadImages, 
+    uploadBlogImages, 
     fetchBlogs, 
     fetchBlog, 
     updateBlog, 
@@ -72,10 +72,10 @@ const router = express.Router();
  *         description: Internal server error
  */
 router.post('/create-post',
-    schemaValidator('/my-blog/create-post'),
     verifySuperAdminToken,
     verifyAdminExist,
-    // uploadImages,
+    schemaValidator('/my-blog/create-post'),
+    uploadBlogImages,
     createBlog
 );
 

@@ -49,7 +49,8 @@ const fetchSuggestion = async(req:Request, res:Response): Promise<Response> => {
     } 
     return res.status(StatusCodes.OK).json({
       message: "Suggestion has been fetched successfully.", 
-      suggestion});
+      suggestion
+    });
   } catch (error) {
     console.error("Error occurred while creating a suggestion message", error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong" });
