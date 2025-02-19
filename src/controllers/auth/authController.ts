@@ -437,13 +437,39 @@ const sendPasswordResetEmail = async (email: string, resetLink: string, twoFACod
     });
     const mailOptions = {
         to: email,
-        subject: 'Password Reset Request',
-        html: `<p>Hi,</p>
-                <p>Your password reset request has been received.</p>
-                <p>Your 2FA code is: <strong>${twoFACode}</strong></p>
-                <p>Click the link below to reset your password:</p>
-                <p><a href="${resetLink}">Reset Password</a></p>
-                <p>If you did not request this, please ignore this email.</p>`,
+        subject: 'Your Password Reset Request Has Been Recieved Successfully.',
+        html: ` 
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset='UTF-8'>
+      <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+      <style>
+        @media(max-width:720px){
+          h3{
+            font-size:22px;
+            padding:10px;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div>
+          <div style="max-width:620px; margin:0 auto; font-family:sans-serif; color:#272727;">
+            <h3 style="background:#f6f6f6; padding:10px; text-align:center; color:#272727;">
+             We have received a password reset request from you demanding to reset your password.
+            </h3>
+            <p>Your 2FA code is: <strong>${twoFACode}</strong></p>
+            <p style="width:80px; margin:0 auto; font-weight:bold; 
+            text-align:center; background:#f6f6f6; border-radius:5px; font-size:25px;">
+             <p>Click the link below to reset your password:</p>
+             <p><a href="${resetLink}">Reset Password</a></p>
+             <p>If you did not request this, please ignore this email.</p>
+            </p>
+          </div>
+      </div>
+    </body>
+    </html>`,
     };
     return transporter.sendMail(mailOptions);
 };
