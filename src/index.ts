@@ -1,4 +1,5 @@
 import express, {Request, Response, Application, NextFunction } from "express";
+import arcjet, { shield, detectBot, tokenBucket } from "@arcjet/node";
 import { StatusCodes } from "http-status-codes";
 import trackingGoogleAnalytics from "./middleware/firebaseAnalytics/firebaseAnalytics";
 import morgan from "morgan";
@@ -40,7 +41,7 @@ import faqRoute from './routes/faqs/faqs.route';
 import testimonialRoute from './routes/testimonial/testimonial.route';
 import databaseConfiguration from "./config/databaseConfig/databaseConfig";
 const app: Application = express();
-const port: number | string = process.env.APP_PORT as string | number || 8000;
+const port: number | string = process.env.APP_PORT as  string | number || 8000;
 const csrfProtection = csurf({cookie: true});
 const server = http.createServer(app);
 const io = new Server(server);
@@ -60,6 +61,31 @@ app.use(cors({
 }));
 app.use(limiter);
 app.use(rateLimiterMiddleware);
+const aj = arcjet({
+  key: process.env.ARCJET_KEY as string,
+  characteristics: ["ip.src"], // Track requests by IP
+  rules: [
+    // Shield protects your app from common attacks e.g. SQL injection, clickjacking, rate limiting among others
+    shield({ mode: "LIVE" }),
+    // Create a bot detection rule
+    detectBot({
+      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+      // Block all bots except the following
+      allow: [
+        "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc
+        "CATEGORY:MONITOR", // Uptime monitoring services
+        "CATEGORY:PREVIEW", // Link previews e.g. Slack, Discord
+      ],
+    }),
+    // Create a token bucket rate limit. Other algorithms are supported.
+    tokenBucket({
+      mode: "LIVE",
+      refillRate: 5, // Refill 5 tokens per interval
+      interval: 10, // Refill every 10 seconds
+      capacity: 10, // Bucket capacity of 10 tokens
+    }),
+  ],
+});
 app.use(`/api/${process.env.API_VERSION}/auth`, authRoute);
 app.use(`/api/${process.env.API_VERSION}/about-me`, aboutMeRoute);
 app.use(`/api/${process.env.API_VERSION}/contact-me`, contactMeRoute);
@@ -82,6 +108,41 @@ app.use(`/api/${process.env.API_VERSION}/my-blog`, blogRoute);
 app.use(`/api/${process.env.API_VERSION}/feedback`,feedbackRoute);
 app.use(`/api/${process.env.API_VERSION}/faq`,faqRoute);
 app.use(`/api/${process.env.API_VERSION}/testimonial`, testimonialRoute);
+function isSpoofed(result:any) {
+  return (
+    result.state !== "DRY_RUN" &&
+    result.reason.isBot() &&
+    result.reason.isSpoofed()
+  );
+}
+app.get("/", async (req:Request, res:Response) => {
+  const decision = await aj.protect(req, { requested: 5 }); // Deduct 5 tokens from the bucket
+   if(process.env.ARCJET_ENV as string) {
+      console.log("Arcjet decision", decision);
+   }
+  if (decision.isDenied()) {
+    if (decision.reason.isRateLimit()) {
+      res.writeHead(429, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Too Many Requests from this particular IP address" }));
+    } else if (decision.reason.isBot()) {
+      res.writeHead(403, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "No bots allowed" }));
+    } else {
+      res.writeHead(403, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Forbidden" }));
+    }
+  } else if (decision.results.some(isSpoofed)) {
+    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // Verification isn't always possible, so we recommend checking the decision
+    // separately.
+    // https://docs.arcjet.com/bot-protection/reference#bot-verification
+    res.writeHead(403, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Forbidden" }));
+  } else {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ message: "Hello World" }));
+  }
+});
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 app.use(trackIncomingRequest);
@@ -112,7 +173,7 @@ async function serve() {
         ${process.env.APP_NAME as string} 
         running on ${process.env.APP_HOST as string | number}
         ${process.env.APP_PORT as string | number} on 
-      api/${process.env.API_VERSION as string | number}`);
+        api/${process.env.API_VERSION as string | number}`);
     });
   } catch (error) {
     console.log("Error occur running the server", error );

@@ -3,15 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "main": "./src/index.ts",
+  "type": "module",
   "scripts": {
     "start": "node dist/index.js",
-    "dev": "nodemon src/index.ts",
+    "dev": "nodemon --exec npx tsx  src/index.ts",
     "build": "npx tsc"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@arcjet/node": "^1.0.0-beta.2",
     "@hapi/joi": "^17.1.1",
     "@paypal/paypal-server-sdk": "^0.6.1",
     "@sideway/address": "^5.0.0",
@@ -83,6 +85,8 @@
     "@types/swagger-ui-express": "^4.1.7",
     "config": "^3.3.12",
     "jshint": "^2.13.6",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.3",
     "typescript": "^5.6.2"
   }
 }
