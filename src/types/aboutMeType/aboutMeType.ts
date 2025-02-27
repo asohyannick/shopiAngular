@@ -27,4 +27,10 @@ export interface IAboutMeType extends Document {
     phone: string;
     linkedIn?: string;
  };
+ techStack:{
+    frontend: string;
+    backend: string;
+    api: string;
+ }[];
+  imageURLs: string[];
 }

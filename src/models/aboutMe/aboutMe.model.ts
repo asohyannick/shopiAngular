@@ -86,6 +86,28 @@ contactInfo:{
         optional: true,
     },
 },
+techStack:[{
+    frontend:{
+        type: String,
+        required: true,
+        trim: true,
+    },
+    backeend:{
+        type: String,
+        required: true,
+        trim: true,
+    },
+    api:{
+        type: String,
+        required: true,
+        trim: true,
+    },
+}],
+imageURLs:{
+    type: [String],
+    required: true,
+    trim: true,
+},
 }, {timestamps: true});
 const AboutMe = mongoose.model<IAboutMeType>('AboutMe', aboutMeSchema);
 export default AboutMe;

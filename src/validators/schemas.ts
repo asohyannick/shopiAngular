@@ -44,16 +44,16 @@ const productValidationSchema = Joi.object({
     rating: Joi.number().min(0).max(5).required(), // Assuming a rating scale of 0 to 5
     posted_Date: Joi.date().required(),
     brand: Joi.string().required(),
-    imageURLs: Joi.array().items(Joi.string().uri()).optional(),
+    imageURLs: Joi.array().items(Joi.string().uri()).required(),
     specifications: Joi.string().required(),
     duration: Joi.number().integer().min(0).required(),
     isFeatured: Joi.boolean().required(),
     discount: Joi.number().positive().required(),
     stockStatus: Joi.string().required(),
     dimensions: Joi.object({
-        height: Joi.number().positive().required(),
-        width: Joi.number().positive().required(),
-        depth: Joi.number().positive().required(),
+        height: Joi.number().positive().optional(),
+        width: Joi.number().positive().optional(),
+        depth: Joi.number().positive().optional(),
     }).required(),
     warrantyPeriod: Joi.string().required(),
     tags: Joi.array().items(Joi.string()).required(),
@@ -96,6 +96,12 @@ const profileSchema = Joi.object({
         phone: Joi.string().optional(),
         linkedin: Joi.string().uri().optional(),
     }).required(),
+    techStack: Joi.object({
+        frontend: Joi.string().min(2).max(500).required(),
+        backend: Joi.string().min(2).max(500).required(),
+        api: Joi.string().min(2).max(500).required(),
+    }).required(),
+    imageURLs: Joi.array().items(Joi.string()).min(1).required(),
 });
 
 

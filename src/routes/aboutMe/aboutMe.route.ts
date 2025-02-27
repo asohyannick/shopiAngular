@@ -1,6 +1,7 @@
 import express from 'express';
 import { 
     createProfile, 
+    uploadAboutMeImages,
     fetchProfiles, 
     fetchProfile, 
     updateProfile, 
@@ -137,6 +138,7 @@ const router = express.Router();
 router.post('/create-profile',
     schemaValidator('/about-me/create-profile'),
     verifyGeneralApplicationAuthenticationToken,
+    uploadAboutMeImages,
     createProfile
 );
 
