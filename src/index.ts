@@ -181,3 +181,4 @@ async function serve() {
 }
 serve();
 export { io } 
+export { app };
