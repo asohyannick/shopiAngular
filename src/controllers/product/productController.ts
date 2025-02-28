@@ -206,7 +206,6 @@ const searchProducts = async (req: Request<{}, {}, {}, ParsedQs>, res: Response)
     } = req.query;
 
     const filter: any = {}; // Explicitly define filter as an object
-    console.log('Search Filters:', filter);
 
     // Parse page and limit as numbers
     const pageNumber = typeof page === 'string' ? parseInt(page) : 1; // Convert to number
@@ -285,7 +284,7 @@ const searchProducts = async (req: Request<{}, {}, {}, ParsedQs>, res: Response)
         }  
         // Count total products matching the filter
         const totalProducts = await ProductModel.countDocuments(filter);
-
+        
         // Fetch products with filtering, sorting, and pagination
         const products = await ProductModel.find(filter)
             .sort(sortOptions)
