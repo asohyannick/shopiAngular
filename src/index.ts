@@ -39,6 +39,8 @@ import feedbackRoute from './routes/feedback/feedback.route';
 import shippingMethodRoute from './routes/shipping/shipping.route';
 import faqRoute from './routes/faqs/faqs.route';
 import testimonialRoute from './routes/testimonial/testimonial.route';
+import serviceRoute from './routes/services/services.route';
+import trainingRoute from './routes/training/training.route';
 import databaseConfiguration from "./config/databaseConfig/databaseConfig";
 const app: Application = express();
 const port: number | string = process.env.APP_PORT as  string | number || 8000;
@@ -108,6 +110,9 @@ app.use(`/api/${process.env.API_VERSION}/my-blog`, blogRoute);
 app.use(`/api/${process.env.API_VERSION}/feedback`,feedbackRoute);
 app.use(`/api/${process.env.API_VERSION}/faq`,faqRoute);
 app.use(`/api/${process.env.API_VERSION}/testimonial`, testimonialRoute);
+app.use(`/api/${process.env.API_VERSION}/service`, serviceRoute);
+app.use(`/api/${process.env.API_VERSION}/training`, trainingRoute);
+
 function isSpoofed(result:any) {
   return (
     result.state !== "DRY_RUN" &&

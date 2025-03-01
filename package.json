@@ -1,7 +1,7 @@
 {
-  "name": "urban bazaar eommerce web application with the MERN stack",
+  "name": "shopiJoi REST API with TypeScript, Express.js and MongoDB",
   "version": "1.0.0",
-  "description": "Welcome to my REST API endpoints for  my ecommerce web application developed, tested and push to production with the MERN stack family of modern technologies called urbanBazaar",
+  "description": "shopiJoi REST API with Typescript, Express.js and MongoDB",
   "main": "./src/index.ts",
   "type": "module",
   "scripts": {
