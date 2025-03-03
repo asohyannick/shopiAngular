@@ -5,7 +5,7 @@ const swaggerOptions = {
     swaggerDefinition: {
         openapi: '3.0.0',
         info: {
-            title: 'shopiJoi REST API developed and maintained by Asoh Yanick using Typescript, Express.js, and MongoDB',
+            title: 'shopiAngular REST API developed and maintained by Asoh Yanick using Typescript, Express.js, and MongoDB',
             version: '1.0.0',
             description:'API Documentation',
         },

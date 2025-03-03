@@ -1,5 +1,5 @@
 {
-  "name": "shopiJoi REST API with TypeScript, Express.js and MongoDB",
+  "name": "shopiAngular REST API with TypeScript, Express.js and MongoDB",
   "version": "1.0.0",
   "description": "shopiJoi REST API with Typescript, Express.js and MongoDB",
   "main": "./src/index.ts",
